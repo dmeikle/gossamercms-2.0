@@ -1,0 +1,2 @@
+ALTER TABLE outbox_events
+ALTER COLUMN "eventType" TYPE VARCHAR(255);

@@ -1,0 +1,52 @@
+-- WITH new_user AS (
+-- INSERT INTO users (
+--     id,
+--     firstname,
+--     lastname,
+--     status,
+--     "createdOn"
+-- )
+-- VALUES (
+--     gen_random_uuid(),
+--     'System',
+--     'Administrator',
+--     'active',
+--     now()
+--     )
+--     RETURNING id
+--     ),
+--     new_context AS (
+-- INSERT INTO user_contexts (
+--     id,
+--     "userId",
+--     "contextType",
+--     "metadata",
+--     "createdAt"
+-- )
+-- SELECT
+--     gen_random_uuid(),
+--     id,
+--     'system',
+--     '{}'::jsonb,
+--     now()
+-- FROM new_user
+--     RETURNING id
+--     )
+-- INSERT INTO account_mappings (
+--     id,
+--     "userContextId",
+--     "accountId",
+--     "roleId",
+--     "isDefault",
+--     "createdAt",
+--     "expiresAt"
+-- )
+-- SELECT
+--     gen_random_uuid(),
+--     new_context.id,
+--     '8f14e45f-ea7b-4c2b-9c1a-1b2c3d4e5f6a'::uuid,   -- real accountId
+--     '7c9e6679-7425-40de-944b-e07fc1f90ae7'::uuid,   -- real roleId
+--     TRUE,
+--     now(),
+--     NULL
+-- FROM new_context;
