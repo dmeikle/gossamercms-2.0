@@ -1,6 +1,7 @@
 package com.gossamercms.users.domain;
 
 import com.gossamercms.mvc.annotations.ModuleModel;
+import com.gossamercms.mvc.helpers.annotations.JsonColumn;
 import com.gossamercms.mvc.models.BaseModel;
 import com.gossamercms.mvc.models.ModelMeta;
 import com.gossamercms.users.api.UserContextDto;
@@ -19,6 +20,7 @@ public class UserContext implements BaseModel {
     private UUID id;
     private UUID userId;
     private String contextType;
+    @JsonColumn
     private Map<String, Object> metadata;
     private Instant createdAt;
     private UUID roleId;

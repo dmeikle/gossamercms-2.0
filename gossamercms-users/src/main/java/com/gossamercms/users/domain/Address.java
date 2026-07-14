@@ -19,7 +19,7 @@ public class Address implements BaseModel {
 
     private UUID userId;
 
-  //  private String type = "";
+    private String type = "";
 
     private String address1;
 
@@ -45,7 +45,7 @@ public class Address implements BaseModel {
             .datasource("postgres")
             .column("id", UUID.class)
             .column("userId", UUID.class)
-          //  .column("type", String.class, 20)
+            .column("type", String.class, 20)
             .column("address1", String.class, 255)
             .column("address2", String.class, 255)
             .column("city", String.class, 100)
@@ -68,7 +68,7 @@ public class Address implements BaseModel {
         return AddressDto.builder()
                 .id(id)
                 .userId(userId)
-//                .type(type)
+                .type(type)
                 .address1(address1)
                 .address2(address2)
                 .city(city)

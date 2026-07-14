@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 public class Auth0AuthenticationProvider implements AuthenticationProvider {
@@ -105,10 +106,42 @@ public class Auth0AuthenticationProvider implements AuthenticationProvider {
         } catch (Exception ex) {
             System.out.println("********************** ERROR WHILE REGISTERING TO AUTH0 ***************************************");
             log.error("Failed to register user in Auth0", ex);
-
+            ex.printStackTrace();
             System.out.println("****************************************************************************************************");
             throw new RuntimeException("Failed to register user in Auth0", ex);
         }
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        try {
+            String token = getManagementApiToken();
+            String encodedEmail = java.net.URLEncoder.encode(email, "UTF-8");
+
+            List<?> users = WebClient.create()
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .scheme("https")
+                            .host(domain)
+                            .path("/api/v2/users")
+                            .queryParam("q", "email:\"" + email + "\"")
+                            .queryParam("search_engine", "v3")
+                            .build())
+                    .header("Authorization", "Bearer " + token)
+                    .retrieve()
+                    .bodyToMono(List.class)
+                    .block();
+
+            return users != null && !users.isEmpty();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("Failed to check email existence in Auth0", ex);
+            throw new RuntimeException("Failed to verify email availability", ex);
+        }
+
+
+
     }
 
     private String getManagementApiToken() {

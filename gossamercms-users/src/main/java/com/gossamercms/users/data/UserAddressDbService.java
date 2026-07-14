@@ -25,37 +25,13 @@ public class UserAddressDbService extends BaseDbService<Address, AddressDto> {
 
     @Override
     protected Address mapToEntity(AddressDto dto) {
-        if (dto == null) return null;
-
-        return Address.builder()
-                .id(dto.getId() != null ? dto.getId() : UUID.randomUUID())
-                .userId(dto.getUserId())
-                .address1(dto.getAddress1())
-                .address2(dto.getAddress2())
-                .city(dto.getCity())
-                .stateProvince(dto.getStateProvince())
-                .postalCode(dto.getPostalCode())
-                .countryCode(dto.getCountryCode())
-                .isDefault(dto.isDefault())
-                .build();
+        return dto.toEntity();
     }
 
 
     @Override
     protected AddressDto mapToDto(Address entity) {
-        if (entity == null) return null;
-
-        return AddressDto.builder()
-                .id(entity.getId())
-                .userId(entity.getUserId())
-                .address1(entity.getAddress1())
-                .address2(entity.getAddress2())
-                .city(entity.getCity())
-                .stateProvince(entity.getStateProvince())
-                .postalCode(entity.getPostalCode())
-                .countryCode(entity.getCountryCode())
-                .isDefault(entity.isDefault())
-                .build();
+        return entity.toDto();
     }
 
 

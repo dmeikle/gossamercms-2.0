@@ -20,7 +20,7 @@ public class AddressDto implements DtoWithId {
 
     private UUID userId;
 
-//    private String type;
+    private String type;
 
     private String address1;
 
@@ -45,7 +45,7 @@ public class AddressDto implements DtoWithId {
         return Address.builder()
                 .id(id)
                 .userId(userId)
-//                .type(type)
+                .type(type)
                 .address1(address1)
                 .address2(address2)
                 .city(city)

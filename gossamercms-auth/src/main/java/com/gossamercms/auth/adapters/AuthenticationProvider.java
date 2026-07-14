@@ -9,4 +9,10 @@ public interface AuthenticationProvider {
      * Returns the provider_user_id (e.g. "auth0|abc123")
      */
     String register(String email, String password);
+
+    /**
+     * Checks if an email is already in use with the authentication provider.
+     * Returns true if the email exists, false if it doesn't.
+     */
+    boolean emailExists(String email);
 }

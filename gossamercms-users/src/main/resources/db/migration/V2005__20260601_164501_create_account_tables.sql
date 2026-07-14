@@ -6,9 +6,19 @@ CREATE TABLE IF NOT EXISTS accounts (
                           "createdAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS user_contexts (
+                                             "id" UUID PRIMARY KEY,
+                                             "userId" UUID NOT NULL,
+                                             "contextType" TEXT NOT NULL,
+                                             "metadata" JSONB NULL,
+                                             "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    FOREIGN KEY ("userId") REFERENCES users("id")
+    );
+
 CREATE TABLE IF NOT EXISTS account_mappings (
                                   "id" UUID PRIMARY KEY,
-                                  "userId" UUID NOT NULL,
+                                  "userContextId" UUID NOT NULL,
                                   "accountId" UUID NOT NULL,
                                   "roleId" UUID NOT NULL,
                                   "isDefault" BOOLEAN NOT NULL DEFAULT FALSE,
@@ -17,17 +27,7 @@ CREATE TABLE IF NOT EXISTS account_mappings (
 
                                   UNIQUE ("userId", "accountId"),
 
-                                  FOREIGN KEY ("userId") REFERENCES users("id"),
+                                  FOREIGN KEY ("userContextId") REFERENCES user_contexts("id"),
                                   FOREIGN KEY ("accountId") REFERENCES accounts("id"),
                                   FOREIGN KEY ("roleId") REFERENCES roles("id")
-);
-
-CREATE TABLE IF NOT EXISTS user_contexts (
-                               "id" UUID PRIMARY KEY,
-                               "userId" UUID NOT NULL,
-                               "contextType" TEXT NOT NULL,
-                               "metadata" JSONB NULL,
-                               "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
-
-                               FOREIGN KEY ("userId") REFERENCES users("id")
 );

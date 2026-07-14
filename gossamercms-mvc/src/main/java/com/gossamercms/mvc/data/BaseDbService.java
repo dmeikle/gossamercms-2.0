@@ -153,10 +153,13 @@ public abstract class BaseDbService<
 
         // Build params (JSONB included)
         Map<String, Object> params = buildParamsForSave(entity);
-
-        // Save using params
-        ds.save(meta.table(), params);
-
+        try {
+            // Save using params
+            ds.save(meta.table(), params);
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
         return mapToDto(entity);
     }
 

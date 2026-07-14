@@ -6,6 +6,7 @@ import com.gossamercms.auth.dtos.requests.AdminRegisterRequestDto;
 import com.gossamercms.auth.dtos.responses.RegisterResponseDto;
 import com.gossamercms.auth.handlers.RegisterHandler;
 import com.gossamercms.auth.handlers.AuthRolesHandler;
+import com.gossamercms.users.exceptions.LoginAlreadyExistsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ public class AdminRegistrationController {
     }
 
     @PostMapping("/register")
-    public RegisterResponseDto register(@RequestBody AdminRegisterRequestDto req) {
+    public RegisterResponseDto register(@RequestBody AdminRegisterRequestDto req) throws LoginAlreadyExistsException {
         RoleDto role = authRolesHandler.getById(req.getRoleId());
         return handler.handle(req, role);
     }

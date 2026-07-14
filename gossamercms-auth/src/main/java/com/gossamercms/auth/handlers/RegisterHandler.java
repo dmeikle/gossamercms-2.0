@@ -18,6 +18,7 @@ import com.gossamercms.users.api.*;
 import com.gossamercms.users.config.UserContextDefaults;
 import com.gossamercms.users.data.*;
 import com.gossamercms.users.domain.*;
+import com.gossamercms.users.exceptions.LoginAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,7 @@ public class RegisterHandler {
         this.authProvider = authProvider;
     }
 
-    public RegisterResponseDto handle(AdminRegisterRequestDto req, RoleDto role) {
+    public RegisterResponseDto handle(AdminRegisterRequestDto req, RoleDto role) throws LoginAlreadyExistsException {
 
         return handle(RegisterRequestDto.builder()
                 .lastname(req.getLastname())
@@ -78,9 +79,13 @@ public class RegisterHandler {
                 .build(), role, ""); //TODO: until we test this, it may generate a new token for the admin by accident
     }
 
-    public RegisterResponseDto handle(RegisterRequestDto req, RoleDto role, String sessionId) {
+    public RegisterResponseDto handle(RegisterRequestDto req, RoleDto role, String sessionId) throws LoginAlreadyExistsException {
 
-        // 1. Create CMS user
+        //first check to see if the email already exists
+        if(authProvider.emailExists(req.getEmail())) {
+            throw new LoginAlreadyExistsException();
+        }
+        // 1. Create user record
         User user = User.builder()
                 .id(null)
                 .firstname(req.getFirstname())
@@ -120,7 +125,7 @@ public class RegisterHandler {
                         .stateProvince(a.getStateProvince())
                         .postalCode(a.getPostalCode())
                         .countryCode(a.getCountryCode())
-//                        .type(a.getType())
+                        .type(a.getType())
                         .isDefault(a.isDefault())
                         .build();
 
