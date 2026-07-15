@@ -1,6 +1,6 @@
 package com.gossamercms.security.config;
 
-import com.gossamercms.security.annotations.CurrentUser;
+import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.security.jwt.JwtUser;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.context.SecurityContextHolder;

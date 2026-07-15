@@ -1,11 +1,14 @@
 package com.gossamercms.mvc.controllers;
 
+import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.mvc.data.DtoWithId;
 import com.gossamercms.mvc.data.ListResultset;
 import com.gossamercms.mvc.data.QueryOptions;
+import com.gossamercms.mvc.exceptions.UnauthorizedStatusException;
 import com.gossamercms.mvc.handlers.BaseHandler;
 
 import com.gossamercms.mvc.http.ApiResponse;
+import com.gossamercms.mvc.jwt.CurrentJwtUser;
 import com.gossamercms.mvc.models.BaseModel;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,21 +31,22 @@ public abstract class BaseController<
 
     // ---------- GET BY ID ----------
     @GetMapping("/{id}")
-    public DtoType getById(@PathVariable UUID id) {
+    public ApiResponse<DtoType> getById(@PathVariable UUID id) {
 
         System.out.println("testing get by id " + id);
-        return handler.getById(id);
+        return ApiResponse.ok(handler.getById(id));
     }
 
     // ---------- GET BY FILTER ----------
     @GetMapping("/get")
-    public DtoType get(@RequestParam Map<String, Object> params) {
-        return handler.get(params);
+    public ApiResponse<DtoType> get(@RequestParam Map<String, Object> params) {
+        return ApiResponse.ok(handler.get(params));
     }
 
     // ---------- LIST / PAGINATION ----------
     @GetMapping
-    public ListResultset<DtoType> getAll(
+    public ApiResponse<ListResultset<DtoType>> getAll(
+            @CurrentUser CurrentJwtUser jwtUser,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "50") int size,
             @RequestParam Map<String, Object> params
@@ -51,73 +55,77 @@ public abstract class BaseController<
         params.remove("size");
 
         QueryOptions options = QueryOptions.of(page, size, params, Map.of());
-        return handler.getAll(options);
+        return ApiResponse.ok(handler.getAll(options));
     }
 
     // ---------- CREATE ----------
     @PostMapping
-    public DtoType create(
-            @RequestHeader("X-User-Id") UUID createdBy,
+    public ApiResponse<DtoType> create(
+            @CurrentUser CurrentJwtUser jwtUser,
             @RequestBody DtoType dto
     ) {
-        return handler.create(createdBy, dto);
+        if(!jwtUser.isAuthenticated()) {
+            throw new UnauthorizedStatusException();
+        }
+
+        return ApiResponse.ok(handler.create(jwtUser.getUserId(), dto));
     }
 
     // ---------- UPDATE BY ID ----------
     @PutMapping("/{id}")
-    public DtoType updateById(
-            @RequestHeader("X-User-Id") UUID updatedBy,
+    public ApiResponse<DtoType> updateById(
+            @CurrentUser CurrentJwtUser jwtUser,
             @PathVariable UUID id,
             @RequestBody DtoType dto
     ) {
-        return handler.updateById(updatedBy, id, dto);
+        return ApiResponse.ok(handler.updateById(jwtUser.getUserId(), id, dto));
     }
 
     // ---------- UPDATE BY FILTER ----------
     @PutMapping("/update")
-    public DtoType update(
-            @RequestHeader("X-User-Id") UUID updatedBy,
+    public ApiResponse<DtoType> update(
+            @CurrentUser CurrentJwtUser jwtUser,
             @RequestBody DtoType dto,
             @RequestParam Map<String, Object> params
     ) {
-        return handler.update(updatedBy, dto, params);
+        return ApiResponse.ok(handler.update(jwtUser.getUserId(), dto, params));
     }
 
     // ---------- DELETE BY ID ----------
     @DeleteMapping("/{id}")
     public void deleteById(
-            @RequestHeader("X-User-Id") UUID deletedBy,
+            @CurrentUser CurrentJwtUser jwtUser,
             @PathVariable UUID id
     ) {
-        handler.deleteById(deletedBy, id);
+        handler.deleteById(jwtUser.getUserId(), id);
     }
 
     // ---------- DELETE BY FILTER ----------
     @DeleteMapping
     public void delete(
-            @RequestHeader("X-User-Id") UUID deletedBy,
+            @CurrentUser CurrentJwtUser jwtUser,
             @RequestParam Map<String, Object> params
     ) {
-        handler.delete(deletedBy, params);
+        handler.delete(jwtUser.getUserId(), params);
     }
 
     // ---------- RESTORE ----------
     @PostMapping("/{id}/restore")
-    public DtoType restore(
-            @RequestHeader("X-User-Id") UUID restoredBy,
+    public ApiResponse<DtoType> restore(
+            @CurrentUser CurrentJwtUser jwtUser,
             @PathVariable UUID id
     ) {
-        return handler.restoreById(restoredBy, id);
+        return ApiResponse.ok(handler.restoreById(jwtUser.getUserId(), id));
     }
 
     // ---------- BULK CREATE OR REPLACE ----------
     @PostMapping("/bulk")
-    public ListResultset<DtoType> createOrReplaceBulk(
-            @RequestHeader("X-User-Id") UUID deletedBy,
+    public ApiResponse<ListResultset<DtoType>> createOrReplaceBulk(
+            @CurrentUser CurrentJwtUser jwtUser,
             @RequestBody List<DtoType> dtos,
             @RequestParam Map<String, Object> deleteExistingKey
     ) {
-        return handler.createOrReplaceBulk(deletedBy, dtos, deleteExistingKey);
+        return ApiResponse.ok(handler.createOrReplaceBulk(jwtUser.getUserId(), dtos, deleteExistingKey));
     }
 
     protected Map<String, String> getOrderBy(Map<String, Object> params) {

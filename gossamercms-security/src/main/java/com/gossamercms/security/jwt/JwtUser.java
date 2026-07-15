@@ -1,5 +1,6 @@
 package com.gossamercms.security.jwt;
 
+import com.gossamercms.mvc.jwt.CurrentJwtUser;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,7 +11,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @Getter
-public class JwtUser implements UserDetails {
+public class JwtUser implements UserDetails, CurrentJwtUser {
 
     private final UUID userId;
     private final String identifier;
@@ -103,6 +104,13 @@ public class JwtUser implements UserDetails {
 
     public String getUserContextId() {
         return userContextId;
+    }
+
+
+
+    @Override
+    public boolean isAuthenticated() {
+        return CurrentJwtUser.super.isAuthenticated();
     }
 
     public String getSessionId() {

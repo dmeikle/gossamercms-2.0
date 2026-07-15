@@ -5,7 +5,7 @@ import com.gossamercms.media.handlers.MediaHandler;
 import com.gossamercms.media.services.MediaService;
 import com.gossamercms.mvc.controllers.BaseController;
 import com.gossamercms.media.models.Media;
-import com.gossamercms.security.annotations.CurrentUser;
+import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.security.jwt.JwtUser;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 

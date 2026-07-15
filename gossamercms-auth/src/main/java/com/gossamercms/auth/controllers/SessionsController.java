@@ -6,7 +6,7 @@ import com.gossamercms.auth.dtos.RoleDto;
 import com.gossamercms.auth.handlers.LoginIdentitiesHandler;
 import com.gossamercms.auth.handlers.AuthRolePermissionsHandler;
 import com.gossamercms.auth.handlers.AuthRolesHandler;
-import com.gossamercms.security.annotations.CurrentUser;
+import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.security.jwt.JwtUser;
 import com.gossamercms.users.api.UserContextDto;
 import com.gossamercms.users.handlers.UserContextsHandler;

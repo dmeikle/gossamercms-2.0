@@ -2,7 +2,7 @@ package com.gossamercms.users.adapters.inbound;
 
 import com.gossamercms.mvc.controllers.BaseController;
 import com.gossamercms.mvc.http.RequestContext;
-import com.gossamercms.security.annotations.CurrentUser;
+import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.security.jwt.JwtUser;
 import com.gossamercms.users.api.UserContextDto;
 import com.gossamercms.users.domain.UserContext;

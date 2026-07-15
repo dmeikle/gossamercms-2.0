@@ -17,10 +17,12 @@ import org.springframework.context.annotation.ComponentScan;
 })
 public class AuthAutoConfig {
 
+
     @PostConstruct
     public void init() {
         System.out.println("************************************************************");
         System.out.println(">>> AuthAutoConfig LOADED");
         System.out.println("************************************************************");
     }
+
 }
