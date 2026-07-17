@@ -8,4 +8,5 @@ public final class MvcExceptionCodes {
     public static final String VALIDATION_ERROR = "MVC-1001";
     public static final String INVALID_REQUEST  = "MVC-1002";
     public static final String UNAUTHORIZED_STATUS = "MVC-1003";
+    public static final String NOT_FOUND = "MVC-1004";
 }

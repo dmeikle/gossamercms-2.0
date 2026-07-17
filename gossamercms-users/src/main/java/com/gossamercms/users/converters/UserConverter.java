@@ -14,14 +14,11 @@ public class UserConverter implements Converter<String, UserDto> {
 
     public UserConverter(UsersDbService usersDbService) {
         this.usersDbService = usersDbService;
-        System.out.println("***************************** UserConverter constructor *****************************");
     }
 
     @Override
     public UserDto convert(String source) {
-System.out.println("***************************** UserConverter convert method called with source: " + source + " *****************************");
         UUID id = UUID.fromString(source);
-
         return usersDbService.getById(id);
     }
 }

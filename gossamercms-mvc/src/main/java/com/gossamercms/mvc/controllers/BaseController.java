@@ -29,12 +29,9 @@ public abstract class BaseController<
 
 
 
-    // ---------- GET BY ID ----------
     @GetMapping("/{id}")
-    public ApiResponse<DtoType> getById(@PathVariable UUID id) {
-
-        System.out.println("testing get by id " + id);
-        return ApiResponse.ok(handler.getById(id));
+    public ApiResponse<DtoType> getById(@PathVariable DtoType id) {
+        return ApiResponse.ok(id);
     }
 
     // ---------- GET BY FILTER ----------
@@ -75,10 +72,10 @@ public abstract class BaseController<
     @PutMapping("/{id}")
     public ApiResponse<DtoType> updateById(
             @CurrentUser CurrentJwtUser jwtUser,
-            @PathVariable UUID id,
+            @PathVariable("id") DtoType existing, //rely on the converter to preload it
             @RequestBody DtoType dto
     ) {
-        return ApiResponse.ok(handler.updateById(jwtUser.getUserId(), id, dto));
+        return ApiResponse.ok(handler.updateById(jwtUser.getUserId(), existing.getId(), dto));
     }
 
     // ---------- UPDATE BY FILTER ----------
@@ -95,9 +92,9 @@ public abstract class BaseController<
     @DeleteMapping("/{id}")
     public void deleteById(
             @CurrentUser CurrentJwtUser jwtUser,
-            @PathVariable UUID id
+            @PathVariable("id") DtoType existing
     ) {
-        handler.deleteById(jwtUser.getUserId(), id);
+        handler.deleteById(jwtUser.getUserId(), existing.getId());
     }
 
     // ---------- DELETE BY FILTER ----------

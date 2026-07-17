@@ -128,7 +128,7 @@ public class UserContextsDbService extends BaseDbService<UserContext, UserContex
                 countSql,
                 params,
                 Map.of(
-                        "userId", "uc.\"userId\""
+                        "userId", "uc.userId"
                 ),
                 Collections.emptyMap(),
                 options.page(),

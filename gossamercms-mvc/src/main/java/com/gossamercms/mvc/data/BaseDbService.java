@@ -187,6 +187,7 @@ public abstract class BaseDbService<
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to build params for save", e);
         }
 

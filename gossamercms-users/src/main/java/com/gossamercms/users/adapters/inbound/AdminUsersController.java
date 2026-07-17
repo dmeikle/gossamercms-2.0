@@ -23,13 +23,13 @@ import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("/admin/users")
-public class UsersAdminController extends BaseController<User, UserDto> {
+public class AdminUsersController extends BaseController<User, UserDto> {
 
     private  UserTelephonesHandler telephonesHandler;
     private UserAddressesHandler userAddressesHandler;
     private UserContextsHandler userContextsHandler;
 
-    public UsersAdminController(UsersHandler handler,
+    public AdminUsersController(UsersHandler handler,
                                 UserTelephonesHandler telephonesHandler,
                                 UserAddressesHandler userAddressesHandler,
                                 UserContextsHandler userContextsHandler) {
@@ -81,7 +81,6 @@ public class UsersAdminController extends BaseController<User, UserDto> {
 
     @GetMapping("/{user}/detailed")
     public UserDetailsResponse getDetailed(@PathVariable("user") UserDto user) {
-
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             CompletableFuture<UserDetailDto> userDetailFuture =
                     CompletableFuture.supplyAsync(

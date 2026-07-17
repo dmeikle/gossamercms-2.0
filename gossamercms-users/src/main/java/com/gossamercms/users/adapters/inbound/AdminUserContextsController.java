@@ -15,9 +15,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/auth/contexts")
-public class UserContextsAdminController  extends BaseController<UserContext, UserContextDto> {
+public class AdminUserContextsController extends BaseController<UserContext, UserContextDto> {
 
-    public UserContextsAdminController(UserContextsHandler handler) {
+    public AdminUserContextsController(UserContextsHandler handler) {
         super(handler);
     }
 
