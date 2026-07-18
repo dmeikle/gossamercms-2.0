@@ -5,6 +5,7 @@ import com.gossamercms.mvc.helpers.annotations.JsonColumn;
 import com.gossamercms.mvc.models.BaseModel;
 import com.gossamercms.mvc.models.ModelMeta;
 import com.gossamercms.mvc.util.ReflectionUtils;
+//import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
@@ -306,11 +307,43 @@ public abstract class BaseDbService<
         return validated;
     }
 
-    public abstract ListResultset<DtoType> createOrReplaceBulk(
-            UUID deletedBy,
+
+  //  @Transactional
+    public ListResultset<DtoType> createOrReplaceBulk(
+            UUID createdBy,
             List<DtoType> dtos,
             Map<String, Object> deleteExistingKey
-    );
+    ) {
+        DataSourceAdapter ds = dsManager.get(meta.datasourceKey());
+
+        // Soft-delete everything currently matching the key
+        if (!deleteExistingKey.isEmpty()) {
+            String where = deleteExistingKey.keySet().stream()
+                    .map(k -> "\"" + k + "\" = :" + k)
+                    .collect(Collectors.joining(" AND "));
+
+            Map<String, Object> params = new HashMap<>(deleteExistingKey);
+            params.put("deletedBy", createdBy);
+
+            String sql = """
+            UPDATE "%s"
+            SET "deletedAt" = now(),
+                "deletedBy" = :deletedBy
+            WHERE %s
+            AND "deletedAt" IS NULL
+            """.formatted(meta.table(), where);
+
+            ds.executeSql(sql, params);
+        }
+
+        // Create each incoming dto fresh, reusing existing create() logic
+        List<DtoType> saved = new ArrayList<>();
+        for (DtoType dto : dtos) {
+            saved.add(create(createdBy, dto));
+        }
+
+        return ListResultset.of(saved, 1, -1, saved.size());
+    }
 
     public void deleteById(UUID deletedBy, UUID id) {
         DataSourceAdapter ds = dsManager.get(meta.datasourceKey());

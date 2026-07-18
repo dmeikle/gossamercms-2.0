@@ -3,8 +3,8 @@ package com.gossamercms.mvc.data;
 import com.gossamercms.mvc.models.ModelMeta;
 
 import org.springframework.jdbc.core.RowMapper;
-import java.util.Map;
-import java.util.UUID;
+
+import java.util.*;
 
 public interface DataSourceAdapter {
     String key();
@@ -20,6 +20,7 @@ public interface DataSourceAdapter {
     Map<String, Object> update(String table, UUID id, Map<String, Object> params);
 
     void delete(String table, UUID id);
+    void bulkDelete(String table, Collection<UUID> ids);
 
     Object restoreById(String table, UUID id, UUID restoredBy);
 
@@ -57,9 +58,13 @@ public interface DataSourceAdapter {
     );
 
     public <T> T findOneBySql(String sql, Map<String, Object> params, RowMapper<T> mapper);
+    public void executeSql(String sql, Map<String, Object> params);
 
     public String buildWhere(
             Map<String, Object> filters,
             Map<String, String> columnMappings
     );
+
+    public Set<UUID> findExistingIds(String table, Collection<UUID> ids);
+
 }

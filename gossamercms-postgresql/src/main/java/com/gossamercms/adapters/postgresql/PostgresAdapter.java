@@ -6,14 +6,15 @@ import com.gossamercms.mvc.data.ListResultset;
 import com.gossamercms.mvc.models.ModelMeta;
 import com.gossamercms.mvc.util.ReflectionUtils;
 import lombok.RequiredArgsConstructor;
-import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -200,6 +201,11 @@ public class PostgresAdapter implements DataSourceAdapter {
         jdbc.update("DELETE FROM " + table + " WHERE id = ?", id);
     }
 
+    @Override
+    public void bulkDelete(String table, Collection<UUID> ids) {
+        jdbc.execute("UPDATE " + table + " SET deletedAt = now() WHERE id IN (" + ids.stream() + ")");
+    }
+
     // ------------------------------------------------------------
     // RESTORE
     // ------------------------------------------------------------
@@ -274,6 +280,11 @@ public class PostgresAdapter implements DataSourceAdapter {
         long total = count(meta.table(), filter);
 
         return ListResultset.of(rows, page, size, total);
+    }
+
+    @Override
+    public boolean exists(String table, UUID id) {
+        return DataSourceAdapter.super.exists(table, id);
     }
 
     // ------------------------------------------------------------
@@ -514,6 +525,12 @@ try {
     throw e;
 }
     }
+
+    @Override
+    public void executeSql(String sql, Map<String, Object> params) {
+        namedJdbcTemplate.update(sql, params);
+    }
+
     private String insertWhereClause(String sql, String whereClause) {
 
         if (whereClause == null || whereClause.isBlank()) {
@@ -570,5 +587,28 @@ try {
 
         return normalized;
     }
+
+    /**
+     * Returns the subset of the given IDs that actually exist in the specialties table.
+     * Callers compare this against the full input set to detect any invalid/unknown IDs.
+     */
+    public Set<UUID> findExistingIds(String table, Collection<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Set.of();
+        }
+
+        return jdbc.query(
+                "select id from " + table + " where id = ANY(?)",
+                ps -> {
+                    Array sqlArray = ps.getConnection().createArrayOf(
+                            "uuid",
+                            ids.toArray(new UUID[0])
+                    );
+                    ps.setArray(1, sqlArray);
+                },
+                (rs, rowNum) -> (UUID) rs.getObject("id")
+        ).stream().collect(Collectors.toSet());
+    }
+
 
 }
