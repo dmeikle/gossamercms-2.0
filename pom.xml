@@ -24,6 +24,7 @@
         <module>gossamercms-globals</module>
         <module>gossamercms-media</module>
         <module>gossamercms-outbox</module>
+        <module>gossamercms-utilities</module>
     </modules>
 
     <properties>

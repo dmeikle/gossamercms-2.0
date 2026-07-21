@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
 
 /**
  * Reflection utilities.
@@ -191,7 +192,22 @@ public final class ReflectionUtils {
                 return ts.toInstant().atOffset(ZoneOffset.UTC);
             }
 
+            // ---------- Check for Array
+            if (value instanceof java.sql.Array sqlArray) {
+                Object array = sqlArray.getArray();
 
+                if (targetType == String[].class) {
+                    return (String[]) array;
+                }
+
+                if (targetType == List.class || List.class.isAssignableFrom(targetType)) {
+                    if (array instanceof Object[] objects) {
+                        return Arrays.asList(objects);
+                    }
+                }
+
+                return array;
+            }
             // ---------- JSON PGobject → Map ----------
             if (value instanceof PGobject pg) {
                 String type = pg.getType();

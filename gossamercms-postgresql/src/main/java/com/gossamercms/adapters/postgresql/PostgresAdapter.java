@@ -488,11 +488,18 @@ public class PostgresAdapter implements DataSourceAdapter {
 
         sql += " LIMIT :limit OFFSET :offset";
 
-        List<T> rows = namedJdbcTemplate.query(
-                sql,
-                queryParams,
-                mapper
-        );
+        List<T> rows = new ArrayList<>();
+
+        try {
+            rows = namedJdbcTemplate.query(
+                    sql,
+                    queryParams,
+                    mapper
+            );
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
 
         Long total = namedJdbcTemplate.queryForObject(
                 countSql,

@@ -63,21 +63,25 @@ public class JsonUtil {
                                      String column,
                                      Class<T> elementType)
             throws SQLException {
+try {
+    String json = rs.getString(column);
 
-        String json = rs.getString(column);
+    if (json == null || json.isBlank()) {
+        return Collections.emptyList();
+    }
 
-        if (json == null || json.isBlank()) {
-            return Collections.emptyList();
-        }
-
-        try {
-            return OBJECT_MAPPER.readValue(
-                    json,
-                    OBJECT_MAPPER.getTypeFactory()
-                            .constructCollectionType(List.class, elementType));
-        } catch (JsonProcessingException e) {
-            throw new SQLException(
-                    "Unable to deserialize JSON column '" + column + "'", e);
-        }
+    try {
+        return OBJECT_MAPPER.readValue(
+                json,
+                OBJECT_MAPPER.getTypeFactory()
+                        .constructCollectionType(List.class, elementType));
+    } catch (JsonProcessingException e) {
+        throw new SQLException(
+                "Unable to deserialize JSON column '" + column + "'", e);
+    }
+}catch (Exception e) {
+    e.printStackTrace();
+    throw e;
+}
     }
 }
