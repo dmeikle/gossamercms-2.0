@@ -8,6 +8,7 @@ import com.gossamercms.mvc.http.ResponseBuilder;
 import com.gossamercms.users.api.*;
 import com.gossamercms.users.api.UserDirectoryDto;
 import com.gossamercms.users.api.responses.UserDetailsResponse;
+import com.gossamercms.users.api.responses.VerifyUserExistsResponse;
 import com.gossamercms.users.handlers.UserAddressesHandler;
 import com.gossamercms.users.handlers.UserContextsHandler;
 import com.gossamercms.users.handlers.UserTelephonesHandler;
@@ -131,6 +132,10 @@ public class AdminUsersController extends BaseController<User, UserDto> {
         }
     }
 
+    @GetMapping("check-exists")
+    public ApiResponse<VerifyUserExistsResponse> checkExists(@RequestParam("email") String email) {
+        return ApiResponse.ok(((UsersHandler) handler).verifyUserExists(email));
+    }
 }
 
 

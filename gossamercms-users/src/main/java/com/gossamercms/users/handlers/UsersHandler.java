@@ -7,6 +7,7 @@ import com.gossamercms.mvc.handlers.BaseHandler;
 import com.gossamercms.users.api.UserDetailDto;
 import com.gossamercms.users.api.UserDirectoryDto;
 import com.gossamercms.users.api.UserDto;
+import com.gossamercms.users.api.responses.VerifyUserExistsResponse;
 import com.gossamercms.users.data.UsersDbService;
 import com.gossamercms.users.domain.User;
 
@@ -26,5 +27,9 @@ public class UsersHandler extends BaseHandler<User, UserDto> {
 
     public UserDetailDto getUserDetail(UUID userId) {
         return ((UsersDbService) db).getUserDetail(userId);
+    }
+
+    public VerifyUserExistsResponse verifyUserExists(String email) {
+        return ((UsersDbService) db).verifyUserExists(email);
     }
 }

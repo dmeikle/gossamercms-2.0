@@ -97,9 +97,15 @@ public class RegisterHandler {
 
         UserDto savedUser = usersDb.create(null, user.toDto());
 
+        String providerUserId = "";
         // 2. Create external identity (Auth0, DB, LDAP, etc.)
-        String providerUserId = authProvider.register(req.getEmail(), req.getPassword());
-
+        try {
+            providerUserId = authProvider.register(req.getEmail(), req.getPassword());
+        }catch(Exception e) {
+            log.error("Failed to register user in Auth0", e);
+            e.printStackTrace();
+            throw e;
+        }
         // 3. Store login identity
         LoginIdentity identity = LoginIdentityFactory.createAuth0EmailIdentity(
                 savedUser.getId(),
@@ -163,7 +169,7 @@ public class RegisterHandler {
                 .userId(savedUser.getId())
                 .createdAt(null)
                 .roleId(role.getId())
-                .metadata(UserContextDefaults.forType(req.getUserContext().getContextType()))
+                .metadata(!req.getUserContext().getMetadata().isEmpty() ? req.getUserContext().getMetadata() : UserContextDefaults.forType(req.getUserContext().getContextType()))
                 .contextType(req.getUserContext().getContextType())
                 .isDefault((true)) //it is assumed
                 .build().toDto()
@@ -206,4 +212,5 @@ public class RegisterHandler {
                 token
         );
     }
+
 }

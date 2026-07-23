@@ -5,14 +5,13 @@ import com.gossamercms.mvc.data.*;
 import com.gossamercms.users.api.UserDetailDto;
 import com.gossamercms.users.api.UserDirectoryDto;
 import com.gossamercms.users.api.UserDto;
+import com.gossamercms.users.api.responses.VerifyUserExistsResponse;
 import com.gossamercms.users.domain.User;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import com.gossamercms.users.policies.UserDirectoryQueryPolicy;
+import com.gossamercms.utilities.privacy.PrivacyMaskUtils;
 
 @ModuleDbService
 public class UsersDbService extends BaseDbService<User, UserDto> {
@@ -232,5 +231,106 @@ System.out.println("Executing directory query with SQL: " + sql);
                         rs.getObject("isDefault", Boolean.class)
                 )
         );
+    }
+
+    public VerifyUserExistsResponse verifyUserExists(String email) {
+
+        DataSourceAdapter ds = dsManager.get(meta.datasourceKey());
+
+        String sql = """
+           select
+               u.id,
+               u.firstname,
+               u.lastname,
+             --  u.dob,
+               u.status,
+               uc."contextType",
+               li.identifier as email,
+               ut."countryCode" as "phoneCountryCode",
+               ut."numberRaw" as "phoneNumber",
+               ua.city,
+               ua."stateProvince",
+               ua."countryCode"
+
+           from users u
+                    inner join user_contexts uc
+                               on u.id = uc."userId"
+                                   and uc."contextType" = 'default'
+                    inner join login_identities li
+                               on li."userId" = u.id
+                    inner join user_telephone ut
+                               on ut."userId" = u.id
+
+           -- ✅ pick default address if exists, otherwise first address
+                    left join lateral (
+               select *
+               from user_addresses a
+               where a."userId" = u.id
+               order by a."isDefault" desc
+               limit 1
+               ) ua on true
+
+           where li.identifier = :email
+        """;
+        try {
+            VerifyUserExistsResponse.Candidate candidate =
+                    ds.findOneBySql(
+                            sql,
+                            Map.of("email", email),
+                            (rs, rowNum) ->
+                                    VerifyUserExistsResponse.Candidate.builder()
+                                            .userId(
+                                                    rs.getObject("id", UUID.class)
+                                            )
+                                            .displayName(
+                                                    PrivacyMaskUtils.maskName(
+                                                            rs.getString("firstname")
+                                                                    + " "
+                                                                    + rs.getString("lastname")
+                                                    )
+                                            )
+                                            .email(
+                                                    PrivacyMaskUtils.maskEmail(
+                                                            rs.getString("email")
+                                                    )
+                                            )
+                                            .phone(
+                                                    PrivacyMaskUtils.maskPhone(
+                                                            rs.getString("phoneCountryCode")
+                                                                    + rs.getString("phoneNumber")
+                                                    )
+                                            )
+    //                                        .dateOfBirth(
+    //                                                rs.getString("dob")
+    //                                        )
+                                            .accountStatus(
+                                                    rs.getString("status")
+                                            )
+                                            .userType(
+                                                    rs.getString("contextType")
+                                            )
+                                            .build()
+                    );
+
+
+            if (candidate != null) {
+
+                return VerifyUserExistsResponse.builder()
+                        .matchFound(true)
+                        .matchType(new String[]{"EMAIL"})
+                        .verificationRequired(true)
+                        .candidate(candidate)
+                        .build();
+
+            }
+
+        }catch (Exception e) {}
+
+        return VerifyUserExistsResponse.builder()
+                .matchFound(false)
+                .matchType(new String[]{})
+                .verificationRequired(false)
+                .candidate(null)
+                .build();
     }
 }
