@@ -35,6 +35,7 @@ public class JsonUtil {
         try {
             return OBJECT_MAPPER.readValue(json, type);
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new SQLException(
                     "Unable to deserialize JSON column '" + column + "'", e);
         }
@@ -54,6 +55,7 @@ public class JsonUtil {
         try {
             return OBJECT_MAPPER.readValue(json, type);
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new SQLException(
                     "Unable to deserialize JSON column '" + column + "'", e);
         }
@@ -63,7 +65,7 @@ public class JsonUtil {
                                      String column,
                                      Class<T> elementType)
             throws SQLException {
-try {
+
     String json = rs.getString(column);
 
     if (json == null || json.isBlank()) {
@@ -76,12 +78,10 @@ try {
                 OBJECT_MAPPER.getTypeFactory()
                         .constructCollectionType(List.class, elementType));
     } catch (JsonProcessingException e) {
+        e.printStackTrace();
         throw new SQLException(
                 "Unable to deserialize JSON column '" + column + "'", e);
     }
-}catch (Exception e) {
-    e.printStackTrace();
-    throw e;
-}
+
     }
 }
