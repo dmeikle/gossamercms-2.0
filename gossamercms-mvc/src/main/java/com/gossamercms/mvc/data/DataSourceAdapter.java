@@ -24,14 +24,15 @@ public interface DataSourceAdapter {
 
     Object restoreById(String table, UUID id, UUID restoredBy);
 
-    long count(String table, Map<String,Object> filter);
+    long count(
+            String table,
+            Map<String, Object> filter,
+            List<QueryFilter> queryFilters
+    );
 
     ListResultset<?> findMany(
             ModelMeta meta,
-            Map<String,Object> filter,
-            Map<String,String> orderBy,
-            int page,
-            int size
+            QueryOptions options
     );
 
     /**
@@ -45,11 +46,22 @@ public interface DataSourceAdapter {
         throw new UnsupportedOperationException("exists() not supported");
     }
 
+    <T> ListResultset<T> findAllBySql(
+            String sql,
+            String countSql,
+            Map<String,Object> params,
+            Map<String,String> columnMappings,
+            Map<String,String> orderBy,
+            int page,
+            int size,
+            RowMapper<T> mapper
+    );
 
     <T> ListResultset<T> findAllBySql(
             String sql,
             String countSql,
             Map<String, Object> params,
+            List<QueryFilter> queryFilters,
             Map<String, String> columnMappings,
             Map<String, String> orderBy,
             int page,
@@ -61,8 +73,10 @@ public interface DataSourceAdapter {
     public void executeSql(String sql, Map<String, Object> params);
 
     public String buildWhere(
-            Map<String, Object> filters,
-            Map<String, String> columnMappings
+            Map<String,Object> filters,
+            List<QueryFilter> queryFilters,
+            Map<String,String> mappings,
+            boolean softDelete
     );
 
     public Set<UUID> findExistingIds(String table, Collection<UUID> ids);

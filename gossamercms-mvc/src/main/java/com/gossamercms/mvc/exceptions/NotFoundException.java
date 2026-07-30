@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class NotFoundException extends ApiException{
 
-    public NotFoundException(UUID id) {
+    public NotFoundException(String id) {
         super(MvcExceptionCodes.NOT_FOUND, "No resource found with id " + id, HttpStatus.NOT_FOUND.value());
     }
 }

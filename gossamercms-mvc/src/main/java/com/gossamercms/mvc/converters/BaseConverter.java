@@ -28,7 +28,7 @@ public abstract class BaseConverter<D extends DtoWithId> implements Converter<St
         UUID id = UUID.fromString(source);
         D dto = dbService.getById(id);
         if (dto == null) {
-            throw new NotFoundException(id); // or whatever your 404 exception is
+            throw new NotFoundException(id.toString()); // or whatever your 404 exception is
         }
         return dto;
     }

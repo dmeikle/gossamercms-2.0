@@ -1,5 +1,7 @@
 package com.gossamercms.mvc.data;
 
+import com.gossamercms.mvc.exceptions.ApiException;
+import com.gossamercms.mvc.exceptions.NotFoundException;
 import com.gossamercms.mvc.helpers.JsonbHelper;
 import com.gossamercms.mvc.helpers.annotations.JsonColumn;
 import com.gossamercms.mvc.models.BaseModel;
@@ -267,10 +269,7 @@ public abstract class BaseDbService<
 
         ListResultset<?> raw = ds.findMany(
                 meta,
-                filter,
-                orderBy,
-                options.page(),
-                options.size()
+                options
         );
 
         List<Map<String, Object>> rows = (List<Map<String, Object>>) raw.list();
@@ -399,7 +398,26 @@ public abstract class BaseDbService<
         return removeExcludedFields(mapToDto((EntityType) entity));
     }
 
-    protected abstract void throw404(String id);
+    /**
+     * we don't always want to throw a 404
+     *
+     * @param params
+     * @return
+     */
+    public DtoType optionalGet(Map<String, Object> params) {
+        try {
+            return get(params);
+        } catch (ApiException ex) {
+            if (ex.getStatus() == 404) {
+                return null;
+            }
+            throw ex;
+        }
+    }
+
+    protected  void throw404(String id) {
+        throw  new NotFoundException(id);
+    }
 
     protected Instant toInstant(Object value) {
         if (value == null) return null;

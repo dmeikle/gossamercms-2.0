@@ -1,6 +1,8 @@
 package com.gossamercms.mvc.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gossamercms.mvc.helpers.JsonbHelper;
 import com.gossamercms.mvc.models.ModelMeta;
 import org.postgresql.util.PGobject;
 
@@ -131,6 +133,7 @@ public final class ReflectionUtils {
             return value;
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(
                     "Failed DTO->DB conversion for " +
                             targetType.getName(),
@@ -209,9 +212,15 @@ public final class ReflectionUtils {
                 return array;
             }
             // ---------- JSON PGobject → Map ----------
+            // ---------- JSON / JSONB ----------
             if (value instanceof PGobject pg) {
                 String type = pg.getType();
+
                 if ("json".equalsIgnoreCase(type) || "jsonb".equalsIgnoreCase(type)) {
+
+                    if (targetType == JsonNode.class) {
+                        return objectMapper.readTree(pg.getValue());
+                    }
 
                     if (Map.class.isAssignableFrom(targetType)) {
                         return objectMapper.readValue(pg.getValue(), Map.class);
@@ -224,6 +233,9 @@ public final class ReflectionUtils {
                     if (targetType == String.class) {
                         return pg.getValue();
                     }
+
+                    // Deserialize into any POJO
+                    return objectMapper.readValue(pg.getValue(), targetType);
                 }
             }
 
@@ -231,6 +243,7 @@ public final class ReflectionUtils {
             return value;
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(
                     "Failed DB->DTO conversion from " +
                             value.getClass().getName() + " to " +

@@ -3,6 +3,8 @@ package com.gossamercms.adapters.postgresql;
 
 import com.gossamercms.mvc.data.DataSourceAdapter;
 import com.gossamercms.mvc.data.ListResultset;
+import com.gossamercms.mvc.data.QueryFilter;
+import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.mvc.models.ModelMeta;
 import com.gossamercms.mvc.util.ReflectionUtils;
 import lombok.RequiredArgsConstructor;
@@ -95,28 +97,90 @@ public class PostgresAdapter implements DataSourceAdapter {
     // FIND ONE
     // ------------------------------------------------------------
     @Override
-    public Object findOne(String table, Map<String, Object> filter) {
-        return findOne(table, filter, Collections.emptyMap());
+    public Object findOne(
+            String table,
+            Map<String, Object> filter
+    ) {
+        return findOne(
+                table,
+                filter,
+                List.of(),
+                Collections.emptyMap()
+        );
     }
 
-    public Object findOne(String table,
-                          Map<String, Object> filter,
-                          Map<String, String> columnMappings) {
 
-        String where = buildWhere(filter, columnMappings);
+    public Object findOne(
+            String table,
+            Map<String, Object> filter,
+            Map<String, String> columnMappings
+    ) {
+        return findOne(
+                table,
+                filter,
+                List.of(),
+                columnMappings
+        );
+    }
 
-        String sql = "SELECT * FROM " + table;
 
-        if (!where.isBlank()) {
+    public Object findOne(
+            String table,
+            Map<String, Object> filter,
+            List<QueryFilter> queryFilters,
+            Map<String, String> columnMappings
+    ) {
+
+        Map<String,Object> params = new HashMap<>();
+
+        if (filter != null) {
+            params.putAll(filter);
+        }
+
+
+        if (queryFilters != null) {
+
+            for (QueryFilter queryFilter : queryFilters) {
+
+                params.put(
+                        queryFilter.field(),
+                        queryFilter.value()
+                );
+            }
+        }
+
+
+        String where =
+                buildWhere(
+                        filter,
+                        queryFilters,
+                        columnMappings,
+                        false
+                );
+
+
+        String sql =
+                "SELECT * FROM " + quote(table);
+
+
+        if (where != null && !where.isBlank()) {
             sql += " WHERE " + where;
         }
 
+
         sql += " LIMIT 1";
 
-        List<Map<String, Object>> rows =
-                namedJdbcTemplate.queryForList(sql, filter);
 
-        return rows.isEmpty() ? null : rows.getFirst();
+        List<Map<String,Object>> rows =
+                namedJdbcTemplate.queryForList(
+                        sql,
+                        params
+                );
+
+
+        return rows.isEmpty()
+                ? null
+                : rows.getFirst();
     }
 
 
@@ -220,18 +284,53 @@ public class PostgresAdapter implements DataSourceAdapter {
     // COUNT
     // ------------------------------------------------------------
     @Override
-    public long count(String table, Map<String, Object> filter) {
-        String where = buildWhere(filter, Collections.emptyMap());
+    public long count(
+            String table,
+            Map<String, Object> filter,
+            List<QueryFilter> queryFilters
+    ) {
 
-        String sql = "SELECT COUNT(*) FROM " + table;
+        Map<String,Object> params = new HashMap<>();
+
+        if (filter != null) {
+            params.putAll(filter);
+        }
+
+
+        if (queryFilters != null) {
+
+            for (QueryFilter queryFilter : queryFilters) {
+
+                params.put(
+                        queryFilter.field(),
+                        queryFilter.value()
+                );
+
+            }
+        }
+
+
+        String where =
+                buildWhere(
+                        filter,
+                        queryFilters,
+                        Collections.emptyMap(),
+                        false
+                );
+
+
+        String sql =
+                "SELECT COUNT(*) FROM " + quote(table);
+
 
         if (where != null && !where.isBlank()) {
             sql += " WHERE " + where;
         }
 
+
         return namedJdbcTemplate.queryForObject(
                 sql,
-                filter,
+                params,
                 Long.class
         );
     }
@@ -242,44 +341,102 @@ public class PostgresAdapter implements DataSourceAdapter {
     @Override
     public ListResultset<?> findMany(
             ModelMeta meta,
-            Map<String, Object> filter,
-            Map<String, String> orderBy,
-            int page,
-            int size
+            QueryOptions options
     ) {
-        page = Math.max(1, page);
-        size = Math.max(1, size);
+
+        int page = Math.max(1, options.page());
+        int size = Math.max(1, options.size());
+
         int offset = (page - 1) * size;
 
-        String where = buildWhere(filter,
-                Collections.emptyMap());
 
-        String orderClause = "";
-        if (!orderBy.isEmpty()) {
-            orderClause = " ORDER BY " + orderBy.entrySet().stream()
-                    .map(e -> quote(e.getKey()) + " " + e.getValue())
-                    .collect(Collectors.joining(", "));
-        } else if (meta.defaultSort() != null && !meta.defaultSort().isBlank()) {
-            String[] parts = meta.defaultSort().split("\\s+");
-            orderClause = " ORDER BY " + quote(parts[0]) + " " + parts[1];
-        }
+        Map<String,Object> normalizedFilter =
+                normalizeFilters(options.filters());
 
-        String sql = "SELECT * FROM " + meta.table();
 
-        if (where != null && !where.isBlank()) {
+        boolean softDeletable =
+                meta.columns().containsKey("deletedAt");
+
+
+        String where =
+                buildWhere(
+                        normalizedFilter,
+                        options.queryFilters(),
+                        Collections.emptyMap(),
+                        softDeletable
+                );
+
+
+        String sql =
+                "SELECT * FROM " + meta.table();
+
+
+        if (!where.isBlank()) {
             sql += " WHERE " + where;
         }
 
-        sql += orderClause;
-        sql += " LIMIT " + size;
-        sql += " OFFSET " + offset;
 
-        System.out.println(sql);
+        if (options.orderBy() != null
+                && !options.orderBy().isEmpty()) {
 
-        List<Map<String, Object>> rows = namedJdbcTemplate.queryForList(sql, filter); //jdbc.queryForList(sql, filter.values().toArray());
-        long total = count(meta.table(), filter);
+            sql += " ORDER BY " +
+                    options.orderBy()
+                            .entrySet()
+                            .stream()
+                            .map(e ->
+                                    quote(e.getKey())
+                                            + " "
+                                            + e.getValue()
+                            )
+                            .collect(Collectors.joining(", "));
+        }
 
-        return ListResultset.of(rows, page, size, total);
+
+        sql += " LIMIT :limit OFFSET :offset";
+
+
+        Map<String, Object> params =
+                new HashMap<>(normalizedFilter);
+
+        if (options.queryFilters() != null) {
+            for (QueryFilter queryFilter : options.queryFilters()) {
+                String parameterName = queryFilter.field();
+                params.put(parameterName, queryFilter.value());
+            }
+        }
+
+        params.put(
+                "limit",
+                size
+        );
+
+        params.put(
+                "offset",
+                offset
+        );
+
+
+        List<Map<String,Object>> rows =
+                namedJdbcTemplate.queryForList(
+                        sql,
+                        params
+                );
+
+
+        long total =
+                count(
+                        meta.table(),
+                        normalizedFilter,
+                        options.queryFilters()
+                );
+
+
+        return ListResultset.of(
+                rows,
+                page,
+                size,
+                total
+        );
     }
 
     @Override
@@ -290,110 +447,292 @@ public class PostgresAdapter implements DataSourceAdapter {
     // ------------------------------------------------------------
     // HELPERS
     // ------------------------------------------------------------
+
+    /**
+     columnMappings - Map an external filter name to the SQL expression that should be filtered.
+
+     For example:
+
+     filters:
+     {
+     "providerId": uuid,
+     "createdAtStart": ...,
+     "createdAtEnd": ...
+     }
+
+     columnMappings:
+     {
+     "providerId" -> "e.provider_id",
+     "createdAt" -> "e.created_at"
+     }
+     *
+     *
+     * @param filters
+     * @param columnMappings
+     * @param excludeSoftDeleted
+     * @return
+     */
     public String buildWhere(
-            Map<String, Object> filters,
-            Map<String, String> columnMappings
+            Map<String,Object> filters,
+            List<QueryFilter> queryFilters,
+            Map<String,String> columnMappings,
+            boolean excludeSoftDeleted
     ) {
-        if (filters == null || filters.isEmpty()) {
-            return "";
+
+        List<String> clauses = new ArrayList<>();
+
+
+        if (excludeSoftDeleted) {
+
+            clauses.add(
+                    "\"deletedAt\" IS NULL"
+            );
         }
 
-        // Identify Start/End pairs
-        Map<String, Object> startMap = new HashMap<>();
-        Map<String, Object> endMap = new HashMap<>();
 
-        filters.forEach((key, value) -> {
-            if (key.endsWith("Start")) {
-                String base = key.substring(0, key.length() - "Start".length());
-                startMap.put(base, value);
-            } else if (key.endsWith("End")) {
-                String base = key.substring(0, key.length() - "End".length());
-                endMap.put(base, value);
+        /*
+         * Existing map filters
+         */
+        if (filters != null && !filters.isEmpty()) {
+
+            for (Map.Entry<String,Object> entry : filters.entrySet()) {
+
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+
+                if (value == null) {
+                    continue;
+                }
+
+
+                if (isIgnoredFilter(key)) {
+                    continue;
+                }
+
+
+                String base =
+                        stripOperator(
+                                stripRangeSuffix(key)
+                        );
+
+
+                String mapped =
+                        columnMappings.getOrDefault(
+                                base,
+                                base
+                        );
+
+
+                String column =
+                        buildColumnExpression(mapped);
+
+
+                String operator = "=";
+
+
+                if (key.endsWith("__like")) {
+                    operator = "LIKE";
+                }
+                else if (key.endsWith("__ilike")) {
+                    operator = "ILIKE";
+                }
+
+
+                clauses.add(
+                        column
+                                + " "
+                                + operator
+                                + " :"
+                                + key
+                );
             }
-        });
-
-        // Build normal filters (excluding Start/End keys)
-        String normalFilters = filters.entrySet().stream()
-                .filter(e -> e.getValue() != null)
-                .filter(e -> !"page".equals(e.getKey()))
-                .filter(e -> !"size".equals(e.getKey()))
-                .filter(e -> !"sortBy".equals(e.getKey()))
-                .filter(e -> !"direction".equals(e.getKey()))
-                .filter(e -> {
-                    String key = e.getKey();
-                    String base = key.endsWith("Start") ? key.substring(0, key.length() - 5)
-                            : key.endsWith("End") ? key.substring(0, key.length() - 3)
-                              : key;
-
-                    // Skip Start/End keys because BETWEEN handles them
-                    return !(startMap.containsKey(base) || endMap.containsKey(base));
-                })
-                .map(e -> {
-                    String key = e.getKey();
-
-                    // Determine base key (strip Start/End)
-                    String base = key.endsWith("Start") ? key.substring(0, key.length() - 5)
-                            : key.endsWith("End") ? key.substring(0, key.length() - 3)
-                              : key;
-
-                    // Use base key for columnMappings
-                    String mapped = columnMappings.getOrDefault(base, base);
-
-                    boolean isExpression = mapped.contains("::") || mapped.contains(" ");
-
-                    String column;
-                    if (mapped.contains("::")) {
-                        // Split expression: column::type
-                        String[] parts = mapped.split("::", 2);
-
-                        // Quote the column name
-                        String quotedColumn = quote(parts[0]);
-
-                        // Reassemble expression
-                        column = quotedColumn + "::" + parts[1];
-                    } else {
-                        // Normal column
-                        column = quote(mapped);
-                    }
-
-                    return column + " = :" + key;
-                })
-
-                .collect(Collectors.joining(" AND "));
-
-        // Build BETWEEN filters
-        String betweenFilters = startMap.entrySet().stream()
-                .filter(e -> endMap.containsKey(e.getKey()))
-                .map(e -> {
-                    String base = e.getKey();
-                    String mapped = columnMappings.getOrDefault(base, base);
-
-                    String column;
-
-                    if (mapped.contains("::")) {
-                        // Handle column::type
-                        String[] parts = mapped.split("::", 2);
-                        column = quote(parts[0]) + "::" + parts[1];
-                    } else {
-                        column = quote(mapped);
-                    }
-
-                    return column + " BETWEEN :" + base + "Start AND :" + base + "End";
-                })
-                .collect(Collectors.joining(" AND "));
-
-
-
-        // Combine both
-        if (!normalFilters.isEmpty() && !betweenFilters.isEmpty()) {
-            return normalFilters + " AND " + betweenFilters;
         }
-        if (!normalFilters.isEmpty()) {
-            return normalFilters;
+
+
+
+        /*
+         * QueryFilter support
+         */
+        if (queryFilters != null) {
+
+            for (QueryFilter filter : queryFilters) {
+
+
+                String mapped =
+                        columnMappings.getOrDefault(
+                                filter.field(),
+                                filter.field()
+                        );
+
+
+                String column =
+                        buildColumnExpression(mapped);
+
+
+                String parameter =
+                        filter.field();
+
+
+                switch(filter.operator()) {
+
+                    case EQUALS ->
+                            clauses.add(
+                                    column + " = :" + parameter
+                            );
+
+
+                    case LIKE ->
+                            clauses.add(
+                                    column + " LIKE :" + parameter
+                            );
+
+
+                    case ILIKE ->
+                            clauses.add(
+                                    column + " ILIKE :" + parameter
+                            );
+
+
+                    case GREATER_THAN ->
+                            clauses.add(
+                                    column + " > :" + parameter
+                            );
+
+
+                    case GREATER_THAN_OR_EQUAL ->
+                            clauses.add(
+                                    column + " >= :" + parameter
+                            );
+
+
+                    case LESS_THAN ->
+                            clauses.add(
+                                    column + " < :" + parameter
+                            );
+
+
+                    case LESS_THAN_OR_EQUAL ->
+                            clauses.add(
+                                    column + " <= :" + parameter
+                            );
+
+
+                    case IN ->
+                            clauses.add(
+                                    column + " IN (:" + parameter + ")"
+                            );
+
+
+                    case NOT_IN ->
+                            clauses.add(
+                                    column + " NOT IN (:" + parameter + ")"
+                            );
+
+
+                    case IS_NULL ->
+                            clauses.add(
+                                    column + " IS NULL"
+                            );
+
+
+                    case IS_NOT_NULL ->
+                            clauses.add(
+                                    column + " IS NOT NULL"
+                            );
+                }
+            }
         }
-        return betweenFilters;
+
+
+        return String.join(
+                " AND ",
+                clauses
+        );
     }
 
+    private boolean isIgnoredFilter(String key) {
+
+        return key.equals("page")
+                || key.equals("size")
+                || key.equals("sortBy")
+                || key.equals("direction");
+
+    }
+
+
+    private String stripOperator(String key) {
+
+        if (key.endsWith("__like")) {
+
+            return key.substring(
+                    0,
+                    key.length()-6
+            );
+
+        }
+
+
+        if (key.endsWith("__ilike")) {
+
+            return key.substring(
+                    0,
+                    key.length()-7
+            );
+
+        }
+
+
+        return key;
+    }
+
+
+
+    private String stripRangeSuffix(String key) {
+
+        if (key.endsWith("Start")) {
+
+            return key.substring(
+                    0,
+                    key.length()-5
+            );
+
+        }
+
+
+        if (key.endsWith("End")) {
+
+            return key.substring(
+                    0,
+                    key.length()-3
+            );
+
+        }
+
+
+        return key;
+    }
+
+
+
+    private String buildColumnExpression(String mapped) {
+
+        if (mapped.contains("::")) {
+
+            String[] parts =
+                    mapped.split("::",2);
+
+
+            return quote(parts[0])
+                    + "::"
+                    + parts[1];
+
+        }
+
+
+        return quote(mapped);
+
+    }
     /**
      * Quote a column name.
      */
@@ -427,85 +766,164 @@ public class PostgresAdapter implements DataSourceAdapter {
         }
         return value;
     }
+    public <T> ListResultset<T> findAllBySql(
+            String sql,
+            String countSql,
+            Map<String,Object> params,
+            Map<String,String> columnMappings,
+            Map<String,String> orderBy,
+            int page,
+            int size,
+            RowMapper<T> mapper
+    ) {
 
+        return findAllBySql(
+                sql,
+                countSql,
+                params,
+                List.of(),
+                columnMappings,
+                orderBy,
+                page,
+                size,
+                mapper
+        );
+    }
 
     public <T> ListResultset<T> findAllBySql(
             String sql,
             String countSql,
             Map<String, Object> params,
+            List<QueryFilter> queryFilters,
             Map<String, String> columnMappings,
             Map<String, String> orderBy,
             int page,
             int size,
             RowMapper<T> mapper
     ) {
+
         page = Math.max(1, page);
         size = Math.max(1, size);
 
         int offset = (page - 1) * size;
 
-        Map<String, Object> queryParams = new HashMap<>(params);
-        queryParams.put("limit", size);
-        queryParams.put("offset", offset);
 
-        // Build WHERE clause
-        // Build WHERE clause
-        String whereClause = buildWhere(params, columnMappings);
+        Map<String,Object> queryParams =
+                new HashMap<>();
 
-        if (!whereClause.isBlank()) {
 
-            if (sql.contains("/*WHERE_CLAUSE*/")) {
-                // Replace placeholder
-                sql = sql.replace("/*WHERE_CLAUSE*/", " WHERE " + whereClause);
-                countSql = countSql.replace("/*WHERE_CLAUSE*/", " WHERE " + whereClause);
+        if (params != null) {
+            queryParams.putAll(params);
+        }
 
-            } else if (hasWhereClause(sql)) {
-                // SQL already has WHERE → append AND
-                sql += " AND " + whereClause;
-                countSql += " AND " + whereClause;
 
-            } else {
-                // SQL has no WHERE → insert WHERE before GROUP BY / HAVING / ORDER BY
-                sql = insertWhereClause(sql, whereClause);
-                countSql = insertWhereClause(countSql, whereClause);
+        if (queryFilters != null) {
 
+            for (QueryFilter filter : queryFilters) {
+
+                queryParams.put(
+                        filter.field(),
+                        filter.value()
+                );
             }
         }
 
 
-        // Build ORDER BY clause
+        queryParams.put("limit", size);
+        queryParams.put("offset", offset);
+
+
+        String whereClause =
+                buildWhere(
+                        params,
+                        queryFilters,
+                        columnMappings,
+                        false
+                );
+
+
+        if (!whereClause.isBlank()) {
+
+            if (sql.contains("/*WHERE_CLAUSE*/")) {
+
+                sql = sql.replace(
+                        "/*WHERE_CLAUSE*/",
+                        " WHERE " + whereClause
+                );
+
+                countSql = countSql.replace(
+                        "/*WHERE_CLAUSE*/",
+                        " WHERE " + whereClause
+                );
+
+            }
+            else if (hasWhereClause(sql)) {
+
+                sql += " AND " + whereClause;
+                countSql += " AND " + whereClause;
+
+            }
+            else {
+
+                sql = insertWhereClause(
+                        sql,
+                        whereClause
+                );
+
+                countSql = insertWhereClause(
+                        countSql,
+                        whereClause
+                );
+            }
+        }
+
+
         if (orderBy != null && !orderBy.isEmpty()) {
 
-            String orderByClause = orderBy.entrySet().stream()
-                    .map(e -> {
-                        String column = columnMappings.getOrDefault(e.getKey(), e.getKey());
-                        return quote(column) + " " + e.getValue();
-                    })
-                    .collect(Collectors.joining(", ", " ORDER BY ", ""));
+            String orderByClause =
+                    orderBy.entrySet()
+                            .stream()
+                            .map(e -> {
+
+                                String column =
+                                        columnMappings.getOrDefault(
+                                                e.getKey(),
+                                                e.getKey()
+                                        );
+
+                                return quote(column)
+                                        + " "
+                                        + e.getValue();
+
+                            })
+                            .collect(Collectors.joining(
+                                    ", ",
+                                    " ORDER BY ",
+                                    ""
+                            ));
 
             sql += orderByClause;
         }
 
+
         sql += " LIMIT :limit OFFSET :offset";
 
-        List<T> rows = new ArrayList<>();
 
-        try {
-            rows = namedJdbcTemplate.query(
-                    sql,
-                    queryParams,
-                    mapper
-            );
-        }catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+        List<T> rows =
+                namedJdbcTemplate.query(
+                        sql,
+                        queryParams,
+                        mapper
+                );
 
-        Long total = namedJdbcTemplate.queryForObject(
-                countSql,
-                params,
-                Long.class
-        );
+
+        Long total =
+                namedJdbcTemplate.queryForObject(
+                        countSql,
+                        queryParams,
+                        Long.class
+                );
+
 
         return ListResultset.of(
                 rows,
@@ -517,20 +935,20 @@ public class PostgresAdapter implements DataSourceAdapter {
 
     @Override
     public <T> T findOneBySql(String sql, Map<String, Object> params, RowMapper<T> mapper) {
-try {
-    return namedJdbcTemplate.queryForObject(
-            sql,
-            params,
-            mapper
-    );
-}catch (Exception e){
-    System.out.println(sql);
-    System.out.println(params);
-    System.out.println(e.getMessage());
-    System.out.println(e.getCause());
-    System.out.println(e.getStackTrace());
-    throw e;
-}
+        try {
+            return namedJdbcTemplate.queryForObject(
+                    sql,
+                    params,
+                    mapper
+            );
+        }catch (Exception e){
+            System.out.println(sql);
+            System.out.println(params);
+            System.out.println(e.getMessage());
+            System.out.println(e.getCause());
+            System.out.println(e.getStackTrace());
+            throw e;
+        }
     }
 
     @Override
@@ -565,32 +983,79 @@ try {
                 + " WHERE " + whereClause + " "
                 + sql.substring(index);
     }
-    private Map<String, Object> normalizeFilters(Map<String, Object> filters) {
-        Map<String, Object> normalized = new HashMap<>(filters);
+    private Map<String,Object> normalizeFilters(
+            Map<String,Object> filters
+    ) {
 
-        for (Map.Entry<String, Object> entry : normalized.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
-            // Any key starting with "is" should be treated as a boolean
-            if (key.startsWith("is")) {
-                if (value instanceof String) {
-                    String s = ((String) value).trim().toLowerCase();
-
-                    // Convert common truthy/falsey strings
-                    if (s.equals("true") || s.equals("1") || s.equals("yes")) {
-                        normalized.put(key, Boolean.TRUE);
-                    } else if (s.equals("false") || s.equals("0") || s.equals("no")) {
-                        normalized.put(key, Boolean.FALSE);
-                    } else {
-                        // Fallback: Boolean.valueOf handles "true"/"false"
-                        normalized.put(key, Boolean.valueOf(s));
-                    }
-                } else if (value instanceof Number) {
-                    normalized.put(key, ((Number) value).intValue() != 0);
-                }
-            }
+        if (filters == null || filters.isEmpty()) {
+            return Map.of();
         }
+
+
+        Map<String,Object> normalized =
+                new HashMap<>();
+
+
+        filters.forEach((key,value)->{
+
+
+            if (value == null) {
+
+                normalized.put(
+                        key,
+                        null
+                );
+
+                return;
+
+            }
+
+
+
+            // LIKE values
+
+            if (key.endsWith("__like")
+                    || key.endsWith("__ilike")) {
+
+
+                if (value instanceof String s) {
+
+                    normalized.put(
+                            key,
+                            "%" + s.trim() + "%"
+                    );
+
+                    return;
+                }
+
+            }
+
+
+
+            // Boolean fields only:
+            // isActive
+            // isDeleted
+            // isSigned
+
+            if (isBooleanField(key)) {
+
+                normalized.put(
+                        key,
+                        convertBoolean(value)
+                );
+
+                return;
+            }
+
+
+
+            normalized.put(
+                    key,
+                    value
+            );
+
+        });
+
 
         return normalized;
     }
@@ -616,6 +1081,58 @@ try {
                 (rs, rowNum) -> (UUID) rs.getObject("id")
         ).stream().collect(Collectors.toSet());
     }
+    private boolean isBooleanField(String key) {
 
+        return key.startsWith("is")
+                && key.length() > 2
+                && Character.isUpperCase(
+                key.charAt(2)
+        );
+
+    }
+
+
+
+    private Boolean convertBoolean(Object value) {
+
+        if (value instanceof Boolean b) {
+            return b;
+        }
+
+
+        if (value instanceof Number n) {
+
+            return n.intValue() != 0;
+
+        }
+
+
+        if (value instanceof String s) {
+
+            s = s.trim().toLowerCase();
+
+
+            return switch(s) {
+
+                case "true",
+                     "1",
+                     "yes" ->
+                        true;
+
+                case "false",
+                     "0",
+                     "no" ->
+                        false;
+
+                default ->
+                        Boolean.valueOf(s);
+
+            };
+
+        }
+
+
+        return false;
+    }
 
 }

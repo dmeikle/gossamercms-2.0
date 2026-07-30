@@ -29,9 +29,23 @@ public class JsonbHelper {
         }
     }
 
-    public static <T> T fromJsonb(String json, Class<T> clazz) {
+    public static <T> T fromJsonb(Object value, Class<T> clazz) {
         try {
-            return json == null ? null : mapper.readValue(json, clazz);
+
+            if (value == null) {
+                return null;
+            }
+
+            String json;
+
+            if (value instanceof PGobject pgObject) {
+                json = pgObject.getValue();
+            } else {
+                json = value.toString();
+            }
+
+            return mapper.readValue(json, clazz);
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse JSONB", e);
         }
