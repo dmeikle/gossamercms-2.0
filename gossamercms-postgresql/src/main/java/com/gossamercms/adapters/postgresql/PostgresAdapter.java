@@ -414,14 +414,17 @@ public class PostgresAdapter implements DataSourceAdapter {
                 "offset",
                 offset
         );
-
-
-        List<Map<String,Object>> rows =
-                namedJdbcTemplate.queryForList(
-                        sql,
-                        params
-                );
-
+        List<Map<String, Object>> rows = null;
+        try {
+            rows =
+                    namedJdbcTemplate.queryForList(
+                            sql,
+                            params
+                    );
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
 
         long total =
                 count(
@@ -493,6 +496,9 @@ public class PostgresAdapter implements DataSourceAdapter {
         /*
          * Existing map filters
          */
+        /*
+         * Existing map filters
+         */
         if (filters != null && !filters.isEmpty()) {
 
             for (Map.Entry<String,Object> entry : filters.entrySet()) {
@@ -500,22 +506,18 @@ public class PostgresAdapter implements DataSourceAdapter {
                 String key = entry.getKey();
                 Object value = entry.getValue();
 
-
                 if (value == null) {
                     continue;
                 }
-
 
                 if (isIgnoredFilter(key)) {
                     continue;
                 }
 
-
                 String base =
                         stripOperator(
                                 stripRangeSuffix(key)
                         );
-
 
                 String mapped =
                         columnMappings.getOrDefault(
@@ -523,13 +525,10 @@ public class PostgresAdapter implements DataSourceAdapter {
                                 base
                         );
 
-
                 String column =
                         buildColumnExpression(mapped);
 
-
                 String operator = "=";
-
 
                 if (key.endsWith("__like")) {
                     operator = "LIKE";
@@ -538,14 +537,26 @@ public class PostgresAdapter implements DataSourceAdapter {
                     operator = "ILIKE";
                 }
 
+                String parameter = key;
 
-                clauses.add(
-                        column
-                                + " "
-                                + operator
-                                + " :"
-                                + key
-                );
+                if (base.endsWith("Id") && isUuid(value)) {
+                    clauses.add(
+                            column
+                                    + " "
+                                    + operator
+                                    + " CAST(:"
+                                    + parameter
+                                    + " AS UUID)"
+                    );
+                } else {
+                    clauses.add(
+                            column
+                                    + " "
+                                    + operator
+                                    + " :"
+                                    + parameter
+                    );
+                }
             }
         }
 
@@ -576,10 +587,19 @@ public class PostgresAdapter implements DataSourceAdapter {
 
                 switch(filter.operator()) {
 
-                    case EQUALS ->
+                    case EQUALS -> {
+
+                        if (parameter.endsWith("Id") && isUuid(filter.value())) {
+                            clauses.add(
+                                    column + " = CAST(:" + parameter + " AS UUID)"
+                            );
+                        } else {
                             clauses.add(
                                     column + " = :" + parameter
                             );
+                        }
+
+                    }
 
 
                     case LIKE ->
@@ -1135,4 +1155,25 @@ public class PostgresAdapter implements DataSourceAdapter {
         return false;
     }
 
+    private boolean isUuid(Object value) {
+
+        if (value == null) {
+            return false;
+        }
+
+        if (value instanceof UUID) {
+            return true;
+        }
+
+        if (value instanceof String s) {
+            try {
+                UUID.fromString(s);
+                return true;
+            } catch (IllegalArgumentException ex) {
+                return false;
+            }
+        }
+
+        return false;
+    }
 }

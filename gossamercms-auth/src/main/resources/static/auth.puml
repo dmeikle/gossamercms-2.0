@@ -1,0 +1,21 @@
+@startuml
+actor User
+participant AuthController
+participant LoginHandler
+participant RefreshTokenHandler
+
+User -> AuthController: POST /auth/login (credentials)
+AuthController -> LoginHandler: handle(LoginRequestDto, sessionId)
+note over LoginHandler: Authenticate user and generate access token
+LoginHandler -> AuthController: return LoginResult
+AuthController -> RefreshTokenHandler: create(LoginResult)
+note over RefreshTokenHandler: Create refresh token
+RefreshTokenHandler -> AuthController: return RefreshTokenDto
+AuthController -> User: return LoginResponseDto (accessToken, refreshToken)
+
+User -> AuthController: POST /auth/refresh (refreshToken)
+AuthController -> RefreshTokenHandler: refresh(refreshToken, sessionId)
+note over RefreshTokenHandler: Validate and refresh token
+RefreshTokenHandler -> AuthController: return RefreshResult
+AuthController -> User: return LoginResponseDto (new accessToken, new refreshToken)
+@enduml
