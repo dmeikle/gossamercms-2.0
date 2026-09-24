@@ -14,11 +14,17 @@ public class JwtClaimsMapper {
     public JwtUser toUser(Claims claims) {
 
         UUID userId = UUID.fromString(claims.getSubject());
-        String identifier = claims.get("identifier", String.class);
-        String sessionId = claims.get("sessionId", String.class);
+        String identifier = extractString(claims.get("identifier"));
+        String sessionId = extractString(claims.get("sessionId"));
         String[] roles = extractArray(claims.get("roles"));
         String[] permissions = extractArray(claims.get("permissions"));
-        String userContextId = claims.get("userContextId", String.class);
+        String userContextId = extractString(claims.get("userContextId"));
+        UUID adminUserId = extractUuid(claims.get("adminUserId"));
+        UUID masqueradingUserId = extractUuid(claims.get("masqueradingUserId"));
+        String adminUserContextId = extractString(claims.get("adminUserContextId"));
+        String adminIdentifier = extractString(claims.get("adminIdentifier"));
+        String[] adminRoles = extractArray(claims.get("adminRoles"));
+        String[] adminPermissions = extractArray(claims.get("adminPermissions"));
 
         return new JwtUser(
                 userId,
@@ -26,7 +32,13 @@ public class JwtClaimsMapper {
                 roles,
                 permissions,
                 sessionId,
-                userContextId
+                userContextId,
+                adminUserId,
+                masqueradingUserId,
+                adminUserContextId,
+                adminIdentifier,
+                adminRoles,
+                adminPermissions
         );
     }
 
@@ -44,6 +56,26 @@ public class JwtClaimsMapper {
         }
 
         return new String[0];
+    }
+
+    private String extractString(Object raw) {
+        if (raw == null) {
+            return null;
+        }
+
+        return String.valueOf(raw);
+    }
+
+    private UUID extractUuid(Object raw) {
+        if (raw == null) {
+            return null;
+        }
+
+        if (raw instanceof UUID uuid) {
+            return uuid;
+        }
+
+        return UUID.fromString(String.valueOf(raw));
     }
 
 

@@ -19,6 +19,12 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
     private final String[] roles;
     private final String[] permissions;
     private final String userContextId;
+    private final UUID adminUserId;
+    private final UUID masqueradingUserId;
+    private final String adminUserContextId;
+    private final String adminIdentifier;
+    private final String[] adminRoles;
+    private final String[] adminPermissions;
     private Collection<GrantedAuthority> authorities;
 
     public JwtUser(
@@ -28,13 +34,9 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
             String[] permissions,
             String sessionId
     ) {
-        this.userId = userId;
-        this.identifier = identifier;
-        this.roles = roles == null ? new String[0] : roles;
-        this.permissions = permissions == null ? new String[0] : permissions;
-        this.sessionid = sessionId;
-        this.userContextId = null;
+        this(userId, identifier, roles, permissions, sessionId, null);
     }
+
     public JwtUser(
             UUID userId,
             String identifier,
@@ -43,12 +45,48 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
             String sessionId,
             String userContextId
     ) {
+        this(
+                userId,
+                identifier,
+                roles,
+                permissions,
+                sessionId,
+                userContextId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    public JwtUser(
+            UUID userId,
+            String identifier,
+            String[] roles,
+            String[] permissions,
+            String sessionId,
+            String userContextId,
+            UUID adminUserId,
+            UUID masqueradingUserId,
+            String adminUserContextId,
+            String adminIdentifier,
+            String[] adminRoles,
+            String[] adminPermissions
+    ) {
         this.userId = userId;
         this.identifier = identifier;
         this.roles = roles == null ? new String[0] : roles;
         this.permissions = permissions == null ? new String[0] : permissions;
         this.sessionid = sessionId;
         this.userContextId = userContextId;
+        this.adminUserId = adminUserId;
+        this.masqueradingUserId = masqueradingUserId;
+        this.adminUserContextId = adminUserContextId;
+        this.adminIdentifier = adminIdentifier;
+        this.adminRoles = adminRoles == null ? new String[0] : adminRoles;
+        this.adminPermissions = adminPermissions == null ? new String[0] : adminPermissions;
     }
 
     @Override
@@ -115,5 +153,9 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
 
     public String getSessionId() {
         return sessionid;
+    }
+
+    public boolean isMasquerading() {
+        return adminUserId != null && masqueradingUserId != null;
     }
 }

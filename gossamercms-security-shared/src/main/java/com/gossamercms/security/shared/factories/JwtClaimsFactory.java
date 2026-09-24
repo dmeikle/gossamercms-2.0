@@ -1,6 +1,7 @@
 package com.gossamercms.security.shared.factories;
 
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,14 +20,27 @@ public  class JwtClaimsFactory {
             String roleName,
             String[] permissions
     ) {
-        return Map.of(
-                "userId", userId.toString(),
-                "userContextId", userContextId,
-                "sessionId", sessionId,
-                "identifier", identifier,
-                "roles", List.of(roleName),
-                "permissions", permissions
-        );
+        return toClaims(userId, userContextId, sessionId, identifier, roleName, permissions, Map.of());
+    }
+
+    public static Map<String, Object> toClaims(
+            UUID userId,
+            UUID userContextId,
+            String sessionId,
+            String identifier,
+            String roleName,
+            String[] permissions,
+            Map<String, Object> extraClaims
+    ) {
+        Map<String, Object> claims = new LinkedHashMap<>();
+        claims.put("userId", userId.toString());
+        claims.put("userContextId", userContextId.toString());
+        claims.put("sessionId", sessionId);
+        claims.put("identifier", identifier);
+        claims.put("roles", List.of(roleName));
+        claims.put("permissions", permissions);
+        claims.putAll(extraClaims);
+        return claims;
     }
 //
 //    public static Map<String, Object> toContextClaims(
@@ -45,4 +59,3 @@ public  class JwtClaimsFactory {
 //        return claims;
 //    }
 }
-
