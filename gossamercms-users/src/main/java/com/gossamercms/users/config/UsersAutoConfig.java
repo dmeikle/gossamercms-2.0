@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableModuleHandlers(basePackage = "com.gossamercms.users.handlers")
 //@EnableModuleControllers(basePackage = "com.gossamercms.users.adapters.inbound")
 @EnableModuleConverters(basePackage = "com.gossamercms.users.converters")
+@EnableModuleServices(basePackage = "com.gossamercms.users.services")
 @ComponentScan(basePackages = "com.gossamercms.users.listeners") // Ensure all components are scanned
 public class UsersAutoConfig {
 
