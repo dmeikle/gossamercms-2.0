@@ -25,6 +25,8 @@
         <module>gossamercms-media</module>
         <module>gossamercms-outbox</module>
         <module>gossamercms-utilities</module>
+        <module>gossamercms-notifications</module>
+        <module>gossamercms-firebase</module>
     </modules>
 
     <properties>
@@ -32,7 +34,7 @@
         <spring.boot.version>3.2.5</spring.boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.9.23</kotlin.version>
-
+        <firebase-admin.version>9.2.0</firebase-admin.version>
     </properties>
 
     <!-- SPRING BOOT BOM: provides versions for ALL dependencies -->

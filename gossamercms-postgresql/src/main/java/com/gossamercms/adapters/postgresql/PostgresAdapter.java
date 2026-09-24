@@ -35,6 +35,7 @@ public class PostgresAdapter implements DataSourceAdapter {
         return "postgres";
     }
 
+
     // ------------------------------------------------------------
     // SAVE (Entity only)
     // ------------------------------------------------------------
@@ -86,9 +87,13 @@ public class PostgresAdapter implements DataSourceAdapter {
         });
     }
 
+    @Override
+    public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+        return namedJdbcTemplate;
+    }
 
 
-        @Override
+    @Override
     public Object find(String id) {
         return null;
     }

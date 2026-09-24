@@ -7,6 +7,10 @@ import com.gossamercms.mvc.helpers.annotations.JsonColumn;
 import com.gossamercms.mvc.models.BaseModel;
 import com.gossamercms.mvc.models.ModelMeta;
 import com.gossamercms.mvc.util.ReflectionUtils;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.transaction.annotation.Transactional;
 //import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
@@ -23,6 +27,8 @@ public abstract class BaseDbService<
     protected final DataSourceManager dsManager;
     protected final ModelMeta meta;
     protected final Class<DtoType> dtoClass;
+    // Cached SQL string generated once per service lifecycle
+    private final String batchUpdateSql;
 
     protected BaseDbService(
             Class<EntityType> modelClass,
@@ -32,12 +38,31 @@ public abstract class BaseDbService<
         this.meta = BaseModel.metaOf(modelClass);
         this.dtoClass = dtoClass;
         this.dsManager = dsManager;
+        this.batchUpdateSql = buildBatchUpdateSql(this.meta);
     }
 
     // ---------- Mapping ----------
     protected abstract EntityType mapToEntity(DtoType dto);
     protected abstract DtoType mapToDto(EntityType entity);
+    /**
+     * Constructs:
+     * UPDATE users SET firstname = :firstname, lastname = :lastname, status = :status ... WHERE id = :id
+     */
+    private String buildBatchUpdateSql(ModelMeta meta) {
+        // Exclude 'id' and read-only columns like 'createdOn' from the SET clause
+        Set<String> excludedColumns = Set.of("id", "createdon", "created_on");
 
+        String setAssignments = meta.columns().keySet().stream()
+                .filter(columnName -> !excludedColumns.contains(columnName.toLowerCase()))
+                .map(columnName -> String.format("%s = :%s", columnName, columnName))
+                .collect(Collectors.joining(", "));
+
+        return String.format(
+                "UPDATE %s SET %s WHERE id = :id",
+                meta.table(),
+                setAssignments
+        );
+    }
     protected <OverrideDto extends DtoType> OverrideDto mapToDto(
             EntityType entity,
             Class<OverrideDto> overrideClass
@@ -459,5 +484,30 @@ public abstract class BaseDbService<
         }
 
         return normalized;
+    }
+    /**
+     * Efficiently updates a batch of DTOs in a single JDBC batch operation.
+     */
+    @Transactional
+    public List<DtoType> updateAll(UUID updatedBy, List<DtoType> dtos) {
+        if (dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        DataSourceAdapter ds = dsManager.get(meta.datasourceKey());
+        NamedParameterJdbcTemplate jdbcTemplate = ds.getNamedParameterJdbcTemplate();
+
+        // Map DTO properties directly to SQL named parameters matching column names
+        SqlParameterSource[] batchParams = dtos.stream()
+                .map(dto -> {
+                    BeanPropertySqlParameterSource paramSource = new BeanPropertySqlParameterSource(dto);
+                    // Handle system audit metadata dynamically
+                    paramSource.registerSqlType("updatedBy", java.sql.Types.OTHER);
+                    return paramSource;
+                })
+                .toArray(SqlParameterSource[]::new);
+
+        jdbcTemplate.batchUpdate(batchUpdateSql, batchParams);
+
+        return dtos;
     }
 }

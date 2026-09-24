@@ -3,13 +3,14 @@ package com.gossamercms.mvc.data;
 import com.gossamercms.mvc.models.ModelMeta;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.*;
 
 public interface DataSourceAdapter {
     String key();
     void save(String table, Map<String, Object> params);
-
+    NamedParameterJdbcTemplate getNamedParameterJdbcTemplate();
     Object find(String id);
     Object findOne(String table, Map<String,Object> filter);
     Object findOneIncludingDeleted(
