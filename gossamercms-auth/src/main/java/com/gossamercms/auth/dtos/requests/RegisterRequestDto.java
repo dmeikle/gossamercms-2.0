@@ -34,5 +34,6 @@ public class RegisterRequestDto {
 
     protected Map<String, Object> metadata;
 
+    @Builder.Default
     protected UserContextDto userContext = UserContextDto.builder().contextType("default").build();
 }

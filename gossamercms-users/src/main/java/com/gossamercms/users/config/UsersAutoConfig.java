@@ -3,6 +3,8 @@ package com.gossamercms.users.config;
 import com.gossamercms.mvc.autoconfig.*;
 import com.gossamercms.users.converters.UserConverter;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -24,6 +26,10 @@ public class UsersAutoConfig {
         System.out.println("************************************************************");
     }
 
-
+    @Bean
+    public SmartInitializingSingleton userContextDefaultsInitializer(ListableBeanFactory beanFactory) {
+        return () -> beanFactory.getBeanProvider(UserContextDefaultsProvider.class)
+                .ifAvailable(UserContextDefaults::setProvider);
+    }
 
 }

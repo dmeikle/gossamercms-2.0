@@ -12,11 +12,12 @@ import com.gossamercms.auth.handlers.RefreshTokenHandler;
 import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.security.jwt.JwtUser;
 import jakarta.servlet.http.HttpSession;
-import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -49,10 +50,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public LoginResponseDto refresh(
             @CurrentUser JwtUser jwtUser,
-            @RequestBody RefreshTokenRequest request) throws BadRequestException {
+            @RequestBody RefreshTokenRequest request) {
 
         if (request == null || request.refreshToken() == null || request.refreshToken().isBlank()) {
-            throw new BadRequestException("Refresh token is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token is required");
         }
 
         String sessionId = (jwtUser == null)

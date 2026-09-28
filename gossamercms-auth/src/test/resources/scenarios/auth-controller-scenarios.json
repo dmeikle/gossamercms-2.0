@@ -1,0 +1,80 @@
+{
+  "scenarios": [
+    {
+      "name": "login happy path",
+      "method": "POST",
+      "uri": "/auth/login",
+      "requestBody": {
+        "email": "alice@example.com",
+        "password": "super-secret"
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "userId": "8f1883ef-4f30-48c5-b064-8961e4418a6f",
+          "email": "alice@example.com",
+          "firstname": "Alice",
+          "lastname": "Example",
+          "token": "access-token-123",
+          "refreshToken": "refresh-token-123",
+          "contexts": [
+            {
+              "id": "53b43563-dc2e-4ea4-9c52-2d59037c53de",
+              "roleId": "1eeb86d9-f38d-4449-b684-b40c0bf0f1df",
+              "metadata": {
+                "defaultContext": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "refresh happy path",
+      "method": "POST",
+      "uri": "/auth/refresh",
+      "currentUser": {
+        "userId": "8f1883ef-4f30-48c5-b064-8961e4418a6f",
+        "identifier": "alice@example.com",
+        "roles": [
+          "USER"
+        ],
+        "permissions": [
+          "auth:refresh"
+        ],
+        "sessionId": "session-123",
+        "userContextId": "53b43563-dc2e-4ea4-9c52-2d59037c53de"
+      },
+      "requestBody": {
+        "refreshToken": "refresh-token-123"
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "userId": "8f1883ef-4f30-48c5-b064-8961e4418a6f",
+          "email": "alice@example.com",
+          "firstname": "Alice",
+          "lastname": "Example",
+          "token": "access-token-123",
+          "refreshToken": "refresh-token-123"
+        }
+      }
+    },
+    {
+      "name": "refresh missing token fast fail",
+      "method": "POST",
+      "uri": "/auth/refresh",
+      "requestBody": {
+        "refreshToken": ""
+      },
+      "expected": {
+        "status": 400,
+        "body": {
+          "error": true,
+          "status": 400,
+          "errorCode": "BAD_REQUEST"
+        }
+      }
+    }
+  ]
+}

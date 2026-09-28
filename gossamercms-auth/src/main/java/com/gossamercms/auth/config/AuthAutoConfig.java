@@ -1,6 +1,5 @@
 package com.gossamercms.auth.config;
 
-
 import com.gossamercms.mvc.autoconfig.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,12 +16,10 @@ import org.springframework.context.annotation.ComponentScan;
 })
 public class AuthAutoConfig {
 
-
     @PostConstruct
     public void init() {
         System.out.println("************************************************************");
         System.out.println(">>> AuthAutoConfig LOADED");
         System.out.println("************************************************************");
     }
-
 }

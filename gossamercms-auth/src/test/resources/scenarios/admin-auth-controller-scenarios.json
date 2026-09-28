@@ -1,0 +1,58 @@
+{
+  "scenarios": [
+    {
+      "name": "start masquerading happy path",
+      "method": "POST",
+      "uri": "/admin/auth/start-masquerading/8f1883ef-4f30-48c5-b064-8961e4418a6f",
+      "currentUser": {
+        "userId": "11111111-1111-1111-1111-111111111111",
+        "identifier": "admin@example.com",
+        "roles": ["ADMIN"],
+        "permissions": ["users:masquerade"],
+        "sessionId": "session-123",
+        "userContextId": "53b43563-dc2e-4ea4-9c52-2d59037c53de"
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "userId": "8f1883ef-4f30-48c5-b064-8961e4418a6f",
+          "email": "alice@example.com",
+          "token": "access-token-123",
+          "refreshToken": "refresh-token-123"
+        }
+      }
+    },
+    {
+      "name": "stop masquerading happy path",
+      "method": "POST",
+      "uri": "/admin/auth/stop-masquerading",
+      "currentUser": {
+        "userId": "8f1883ef-4f30-48c5-b064-8961e4418a6f",
+        "identifier": "alice@example.com",
+        "roles": ["USER"],
+        "permissions": [],
+        "sessionId": "session-123",
+        "userContextId": "53b43563-dc2e-4ea4-9c52-2d59037c53de"
+      },
+      "expected": {
+        "status": 200,
+        "body": {
+          "userId": "11111111-1111-1111-1111-111111111111",
+          "email": "admin@example.com"
+        }
+      }
+    },
+    {
+      "name": "stop masquerading unauthorized",
+      "method": "POST",
+      "uri": "/admin/auth/stop-masquerading",
+      "expected": {
+        "status": 401,
+        "body": {
+          "error": true,
+          "status": 401
+        }
+      }
+    }
+  ]
+}

@@ -23,7 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ModuleHandler
 public class RegisterHandler {
@@ -164,13 +166,24 @@ public class RegisterHandler {
         }
 
         //7. Generate UserContext
+        UserContextDto requestedUserContext = req.getUserContext() != null
+                ? req.getUserContext()
+                : UserContextDto.builder().contextType(DEFAULT_TYPE).build();
+        String contextType = requestedUserContext.getContextType() == null || requestedUserContext.getContextType().isBlank()
+                ? DEFAULT_TYPE
+                : requestedUserContext.getContextType();
+        Map<String, Object> metadata = new HashMap<>(UserContextDefaults.forType(contextType));
+        if (requestedUserContext.getMetadata() != null) {
+            metadata.putAll(requestedUserContext.getMetadata());
+        }
+
         UserContextDto userContext = contextsDb.create(savedUser.getId(),
                 UserContext.builder()
                 .userId(savedUser.getId())
                 .createdAt(null)
                 .roleId(role.getId())
-                .metadata(!req.getUserContext().getMetadata().isEmpty() ? req.getUserContext().getMetadata() : UserContextDefaults.forType(req.getUserContext().getContextType()))
-                .contextType(req.getUserContext().getContextType())
+                .metadata(metadata)
+                .contextType(contextType)
                 .isDefault((true)) //it is assumed
                 .build().toDto()
                         );
