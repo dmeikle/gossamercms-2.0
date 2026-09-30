@@ -36,8 +36,8 @@ case "$1" in
         ;;
 esac
 
-mvn -pl "$MODULE" \
+mvn -pl "$MODULE" -am \
     -Dtest=GenericEndpointTest \
-    -Dendpoint.test.base-url=http://localhost:8080 \
+    -Dendpoint.test.base-url=http://localhost:18080 \
     -Dsurefire.failIfNoSpecifiedTests=false \
     test

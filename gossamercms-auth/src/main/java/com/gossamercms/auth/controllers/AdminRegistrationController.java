@@ -11,8 +11,11 @@ import com.gossamercms.auth.handlers.RegisterHandler;
 import com.gossamercms.auth.handlers.AuthRolesHandler;
 import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.mvc.http.ApiResponse;
+import com.gossamercms.mvc.jwt.CurrentJwtUser;
 import com.gossamercms.security.jwt.JwtUser;
+import com.gossamercms.users.api.UserDto;
 import com.gossamercms.users.exceptions.LoginAlreadyExistsException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -42,6 +45,15 @@ public class AdminRegistrationController {
         RoleDto role = authRolesHandler.getById(req.getRoleId());
 
         return ApiResponse.ok(handler.handle(req, role));
+    }
+
+    @Transactional
+    @DeleteMapping("/{user}")
+    public void deleteById(
+            @CurrentUser JwtUser jwtUser,
+            @PathVariable("user") UserDto user
+    ) {
+        handler.deleteAccount(jwtUser.getUserId(), user.getId());
     }
 
 }

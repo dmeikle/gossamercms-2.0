@@ -144,6 +144,34 @@ public class Auth0AuthenticationProvider implements AuthenticationProvider {
 
     }
 
+    @Override
+    public boolean deleteAccount(String accountId) {
+        try {
+            WebClient.create()
+                    .delete()
+                    .uri(uriBuilder -> uriBuilder
+                            .scheme("https")
+                            .host(domain)
+                            .path("/api/v2/users/{userId}")
+                            .build(accountId))
+                    .header("Authorization", "Bearer " + getManagementApiToken())
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+
+            log.info("Successfully deleted Auth0 user: {}", accountId);
+
+        } catch (Exception ex) {
+            log.error("Failed to delete user {} from Auth0", accountId, ex);
+            throw new RuntimeException(
+                    "Failed to delete user from Auth0: " + accountId,
+                    ex
+            );
+        }
+
+        return true;
+    }
+
     private String getManagementApiToken() {
         Map<String, Object> body = Map.of(
                 "grant_type", "client_credentials",

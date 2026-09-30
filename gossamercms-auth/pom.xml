@@ -72,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>com.gossamercms</groupId>
-            <artifactId>tests</artifactId>
+            <artifactId>gossamercms-2.0-testing</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>

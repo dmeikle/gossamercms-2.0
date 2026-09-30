@@ -194,6 +194,29 @@ public class PostgresAdapter implements DataSourceAdapter {
                 sql.contains("/*WHERE_CLAUSE*/"));
     }
 
+    private boolean hasColumn(String table, String column) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_schema = current_schema()
+                      AND table_name = :table
+                      AND column_name = :column
+                )
+                """;
+
+        Boolean exists = namedJdbcTemplate.queryForObject(
+                sql,
+                Map.of(
+                        "table", table,
+                        "column", column
+                ),
+                Boolean.class
+        );
+
+        return Boolean.TRUE.equals(exists);
+    }
+
     @Override
     public Object findOneIncludingDeleted(String table, Map<String, Object> filter) {
         return findOne(table, filter);
@@ -449,7 +472,21 @@ public class PostgresAdapter implements DataSourceAdapter {
 
     @Override
     public boolean exists(String table, UUID id) {
-        return DataSourceAdapter.super.exists(table, id);
+        String sql = "SELECT EXISTS (SELECT 1 FROM " + quote(table) + " WHERE \"id\" = :id";
+
+        if (hasColumn(table, "deletedAt")) {
+            sql += " AND \"deletedAt\" IS NULL";
+        }
+
+        sql += ")";
+
+        Boolean exists = namedJdbcTemplate.queryForObject(
+                sql,
+                Map.of("id", id),
+                Boolean.class
+        );
+
+        return Boolean.TRUE.equals(exists);
     }
 
     // ------------------------------------------------------------

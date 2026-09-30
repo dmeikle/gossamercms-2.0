@@ -98,11 +98,11 @@
             <version>1.5.3</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.gossamercms</groupId>
             <artifactId>gossamercms-2.0-testing</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -111,11 +111,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <dependenciesToScan>
-                        <dependency>com.gossamercms:gossamercms-2.0-testing</dependency>
-                    </dependenciesToScan>
-                </configuration>
             </plugin>
 
         </plugins>
@@ -124,7 +119,6 @@
             <testResource>
                 <directory>${project.basedir}/src/test/resources</directory>
             </testResource>
-            <!-- any additional custom resource directory here -->
         </testResources>
     </build>
 </project>

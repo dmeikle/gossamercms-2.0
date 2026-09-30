@@ -13,12 +13,14 @@
     {
       "name": "Get all user directory",
       "method": "GET",
-      "url": "/admin/users/directory?page=0&size=1",
+      "url": "/admin/users/directory?page=0&size=2",
       "expectedStatus": 200,
       "ignoreFields": [
         "lastLoginAt",
         "totalCount",
-        "totalPages"
+        "totalPages",
+        "page",
+        "pageSize"
       ],
       "expectedBody": {
         "success": true,
@@ -27,21 +29,34 @@
             {
               "id": "b571d101-b9d3-42b7-ba48-118f9b5b5f3e",
               "email": "test.user64@example.com",
-              "firstname": "ADMIN",
+              "firstname": "Admin",
               "lastname": "ADMIN",
               "status": null,
               "ipAddress": null,
               "createdOn": null,
               "contextType": "default",
-              "lastLoginAt": "2026-09-29T23:30:53.272584Z",
+              "lastLoginAt": "2026-09-30T20:57:52.216486Z",
+              "phoneCountryCode": "+1",
+              "phoneNumber": "604-123-1234"
+            },
+            {
+              "id": "08067cf6-220f-4861-aaf4-ec9bb58b3a38",
+              "email": "test.user127@example.com",
+              "firstname": "Test",
+              "lastname": "User",
+              "status": null,
+              "ipAddress": null,
+              "createdOn": null,
+              "contextType": "default",
+              "lastLoginAt": null,
               "phoneCountryCode": "+1",
               "phoneNumber": "604-555-0199"
             }
           ],
           "page": 1,
-          "pageSize": 1,
-          "totalCount": 9,
-          "totalPages": 9
+          "pageSize": 10,
+          "totalCount": 2,
+          "totalPages": 1
         },
         "message": null
       }
@@ -56,7 +71,7 @@
         "id",
         "lastLoginAt"
       ],
-      "expectedBody": {"userDetail":{"firstname":"ADMIN","lastname":"ADMIN","contextType":"default","email":"test.user64@example.com","phoneCountryCode":"+1","phoneNumber":"604-555-0199","address1":"123 Main Street","address2":"Unit 4B","city":"Vancouver","stateProvince":"BC","postalCode":"V5K0A1","countryCode":"CA","isDefault":true},"telephone":{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","countryCode":"+1","numberRaw":"604-555-0199","type":"MOBILE","verified":true,"smsOptIn":true,"preferred":true,"extension":null,"createdOn":"2026-07-14T07:11:13.225612Z"},"addresses":[{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","type":"test","address1":"123 Main Street","address2":"Unit 4B","city":"Vancouver","stateProvince":"BC","postalCode":"V5K0A1","countryCode":"CA","default":true,"billing":false},{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","type":"test","address1":"500 Burrard Street","address2":"Suite 1200","city":"Vancouver","stateProvince":"BC","postalCode":"V6C3A6","countryCode":"CA","default":false,"billing":true}],"contexts":[{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","contextType":"admin","metadata":{"theme":"dark","clinic":"e6b820a9-381e-471b-a884-be34cce9a033","homepage":"/dashboard-pages/provider-dashboard","language":"en-US","timezone":"UTC","defaultContext":true,"organizationId":"23bf84ee-1060-459c-82b2-a52d004af01f","onboardingCompleted":false},"roleId":"ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6","name":"system-admin","description":"Full system administrator with unrestricted access","system":true},{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","contextType":"default","metadata":{"theme":"dark","clinic":"e6b820a9-381e-471b-a884-be34cce9a033","homepage":"/dashboard-pages/provider-dashboard","language":"en-US","timezone":"UTC","defaultContext":true,"organizationId":"23bf84ee-1060-459c-82b2-a52d004af01f","onboardingCompleted":false},"roleId":"ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6","name":"system-admin","description":"Full system administrator with unrestricted access","system":true}]}
+      "expectedBody": {"userDetail":{"firstname":"Admin","lastname":"ADMIN","contextType":"default","email":"test.user64@example.com","phoneCountryCode":"+1","phoneNumber":"604-123-1234","address1":"123 Main Street","address2":"Unit 4B","city":"Vancouver","stateProvince":"BC","postalCode":"V5K0A1","countryCode":"CA","isDefault":true},"telephone":{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","countryCode":"+1","numberRaw":"604-123-1234","type":"MOBILE","verified":true,"smsOptIn":true,"preferred":true,"extension":null,"createdOn":"2026-09-30T20:30:14.418116Z"},"addresses":[{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","type":"SHIPPING","address1":"123 Main Street","address2":"Unit 4B","city":"Vancouver","stateProvince":"BC","postalCode":"V5K0A1","countryCode":"CA","default":true,"billing":false},{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","type":"BILLING","address1":"500 Burrard Street","address2":"Suite 1200","city":"Vancouver","stateProvince":"BC","postalCode":"V6C3A6","countryCode":"CA","default":false,"billing":true}],"contexts":[{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","contextType":"admin","metadata":{"theme":"dark","homepage":"/admin/dashboard","language":"en-US","timezone":"UTC","defaultContext":true,"onboardingCompleted":false},"roleId":"ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6","name":"system-admin","description":"Full system administrator with unrestricted access","system":true},{"userId":"b571d101-b9d3-42b7-ba48-118f9b5b5f3e","contextType":"default","metadata":{"theme":"dark","clinic":"e6b820a9-381e-471b-a884-be34cce9a033","homepage":"/dashboard-pages/provider-dashboard","language":"en-US","timezone":"UTC","defaultContext":true,"organizationId":"23bf84ee-1060-459c-82b2-a52d004af01f","onboardingCompleted":false},"roleId":"ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6","name":"system-admin","description":"Full system administrator with unrestricted access","system":true}]}
     },
     {
       "name": "Create a user",

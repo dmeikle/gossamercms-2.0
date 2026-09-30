@@ -15,4 +15,6 @@ public interface AuthenticationProvider {
      * Returns true if the email exists, false if it doesn't.
      */
     boolean emailExists(String email);
+
+    boolean deleteAccount(String id);
 }

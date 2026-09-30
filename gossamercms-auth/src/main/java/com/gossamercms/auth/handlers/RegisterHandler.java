@@ -22,10 +22,7 @@ import com.gossamercms.users.exceptions.LoginAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ModuleHandler
 public class RegisterHandler {
@@ -226,4 +223,23 @@ public class RegisterHandler {
         );
     }
 
+    public void deleteAccount(UUID deletedBy, UUID userId) {
+        //first get their authentication provider account details for remote api (eg: Auth0)
+        LoginIdentityDto loginIdentity = identityDb.get(Map.of("userId", userId));
+        UserContextDto userContext = contextsDb.get(Map.of("userId", userId));
+        //9. Delete AccountMapping
+        accountMappingsDbService.delete(deletedBy, Map.of("userContextId", userContext.getId()));
+        //7. Delete UserContext
+        contextsDb.delete(deletedBy, Map.of("userId", userId));
+        // 5. Delete telephones
+        telephonesDb.delete(deletedBy, Map.of("userId", userId));
+        // 4. Delete addresses
+        addressDb.delete(deletedBy, Map.of("userId", userId));
+        // 3. Delete login identity
+        identityDb.delete(deletedBy, Map.of("userId", userId));
+        // 2. Delete external identity (Auth0, DB, LDAP, etc.)
+        authProvider.deleteAccount(loginIdentity.getProviderUserId());
+        // 1. Delete user record
+        usersDb.delete(deletedBy, Map.of("id", userId));
+    }
 }
