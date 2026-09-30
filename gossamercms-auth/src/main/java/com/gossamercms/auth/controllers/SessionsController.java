@@ -10,6 +10,7 @@ import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.security.jwt.JwtUser;
 import com.gossamercms.users.api.UserContextDto;
 import com.gossamercms.users.handlers.UserContextsHandler;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class SessionsController {
 
 
     @PostMapping("/context/{userContext}")
+    @ResponseStatus(HttpStatus.OK)
     public Object selectContext(@CurrentUser JwtUser jwtUser, @PathVariable("userContext") UserContextDto userContext) {
         RoleDto role = this.authRolesHandler.getById(userContext.getRoleId());
         List<PermissionDto> permissions = authRolePermissionsHandler.listPermissionsForRole(role.getId());

@@ -112,6 +112,7 @@ public class AdminUsersController extends BaseController<User, UserDto> {
                                     QueryOptions.builder()
                                             .page(1)
                                             .filters(Map.of("userId", user.getId()))
+                                            .orderBy(Map.of("contextType", "asc"))
                                             .build()
                             ).list(),
                             executor
@@ -123,13 +124,35 @@ public class AdminUsersController extends BaseController<User, UserDto> {
                     contextsFuture
             ).join();
 
-            return new UserDetailsResponse(
-                    userDetailFuture.join(),
-                    telephoneFuture.join(),
-                    addressesFuture.join(),
-                    contextsFuture.join()
-            );
-        }
+        return new UserDetailsResponse(
+                userDetailFuture.join(),
+                telephoneFuture.join(),
+                addressesFuture.join(),
+                contextsFuture.join()
+        );
+    }
+//        UserDetailDto userDetailFuture = ((UsersHandler) handler).getUserDetail(user.getId());
+//        UserTelephoneDto telephoneFuture =telephonesHandler.get(Map.of("userId", user.getId()));
+//        List<AddressDto> addressesFuture = userAddressesHandler.getAll(
+//                                    QueryOptions.builder()
+//                                            .page(1)
+//                                            .filters(Map.of("userId", user.getId()))
+//                                            .build()
+//                            ).list();
+//        List<UserContextDetailDto> contextsFuture = userContextsHandler.getDetailed(
+//                                    QueryOptions.builder()
+//                                            .page(1)
+//                                            .filters(Map.of("userId", user.getId()))
+//                                            .build()
+//                            ).list();
+//
+//            return new UserDetailsResponse(
+//                    userDetailFuture,
+//                    telephoneFuture,
+//                    addressesFuture,
+//                    contextsFuture
+//            );
+
     }
 
     @GetMapping("check-exists")

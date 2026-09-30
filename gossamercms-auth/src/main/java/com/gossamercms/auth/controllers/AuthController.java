@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,6 +35,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
     public LoginResponseDto login(@RequestBody LoginRequestDto req, HttpSession session) {
         LoginResult loginResult =  loginHandler.handle(req, session.getId());
         RefreshTokenDto refreshToken = refreshTokenHandler.create(loginResult);
@@ -48,6 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @ResponseStatus(HttpStatus.OK)
     public LoginResponseDto refresh(
             @CurrentUser JwtUser jwtUser,
             @RequestBody RefreshTokenRequest request) {

@@ -10,6 +10,7 @@ import com.gossamercms.mvc.handlers.BaseHandler;
 import com.gossamercms.mvc.http.ApiResponse;
 import com.gossamercms.mvc.jwt.CurrentJwtUser;
 import com.gossamercms.mvc.models.BaseModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -108,6 +109,7 @@ public abstract class BaseController<
 
     // ---------- RESTORE ----------
     @PostMapping("/{id}/restore")
+    @ResponseStatus(HttpStatus.OK)
     public ApiResponse<DtoType> restore(
             @CurrentUser CurrentJwtUser jwtUser,
             @PathVariable UUID id

@@ -10,6 +10,7 @@ import com.gossamercms.security.jwt.JwtUser;
 import com.gossamercms.users.api.UserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -29,6 +30,7 @@ public class AdminAuthController {
     private final RefreshTokenHandler refreshTokenHandler;
 
     @PostMapping("/start-masquerading/{user}")
+    @ResponseStatus(HttpStatus.OK)
     public LoginResponseDto startMasquerading(
             @CurrentUser JwtUser jwtUser,
             @PathVariable("user") UserDto user,
@@ -41,6 +43,7 @@ public class AdminAuthController {
     }
 
     @PostMapping("/stop-masquerading")
+    @ResponseStatus(HttpStatus.OK)
     public LoginResponseDto stopMasquerading(@CurrentUser JwtUser jwtUser, HttpSession session) {
         LoginResult loginResult = masqueradeHandler.stop(jwtUser, session.getId());
         RefreshTokenDto refreshToken = refreshTokenHandler.create(loginResult);

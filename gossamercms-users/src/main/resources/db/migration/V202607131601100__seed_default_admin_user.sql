@@ -11,8 +11,8 @@ INSERT INTO users (
     "createdOn"
 ) VALUES (
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
-             'Test',
-             'User',
+             'Admin',
+             'ADMIN',
              'ACTIVE',
              NOW()
          ) ON CONFLICT DO NOTHING;
@@ -49,6 +49,11 @@ INSERT INTO user_contexts (
              true
          ) ON CONFLICT DO NOTHING;
 
+INSERT INTO user_contexts (id, "userId", "contextType", metadata, "createdAt", "roleId", "isDefault") VALUES
+ ('5d9f516b-f218-4eea-831b-5164df6b263c', 'b571d101-b9d3-42b7-ba48-118f9b5b5f3e', 'default', '{"theme": "dark", "clinic": "e6b820a9-381e-471b-a884-be34cce9a033", "homepage": "/dashboard-pages/provider-dashboard", "language": "en-US", "timezone": "UTC", "defaultContext": true, "organizationId": "23bf84ee-1060-459c-82b2-a52d004af01f", "onboardingCompleted": false}', '2026-07-14 00:11:13.225612', 'ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6', false);
+
+
+
 -- Insert user address 1 (Shipping - Default)
 INSERT INTO user_addresses (
     id,
@@ -64,7 +69,7 @@ INSERT INTO user_addresses (
 ) VALUES (
              gen_random_uuid(),
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
-             'test',
+             'SHIPPING',
              '123 Main Street',
              'Unit 4B',
              'Vancouver',
@@ -89,7 +94,7 @@ INSERT INTO user_addresses (
 ) VALUES (
              gen_random_uuid(),
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
-             'test',
+             'BILLING',
              '500 Burrard Street',
              'Suite 1200',
              'Vancouver',
@@ -115,8 +120,8 @@ INSERT INTO user_telephone (
              gen_random_uuid(),
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
              '+1',
-             '604-555-0199',
-             '+16045550199',
+             '604-123-1234',
+             '+16041231234',
              'MOBILE',
              true,
              true,

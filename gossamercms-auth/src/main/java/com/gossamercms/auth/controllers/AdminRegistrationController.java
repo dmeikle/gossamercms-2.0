@@ -11,6 +11,7 @@ import com.gossamercms.auth.handlers.RegisterHandler;
 import com.gossamercms.auth.handlers.AuthRolesHandler;
 import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.mvc.http.ApiResponse;
+import com.gossamercms.security.jwt.JwtUser;
 import com.gossamercms.users.exceptions.LoginAlreadyExistsException;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,9 +35,13 @@ public class AdminRegistrationController {
     }
 
     @PostMapping("/register")
-    public RegisterResponseDto register(@RequestBody AdminRegisterRequestDto req) throws LoginAlreadyExistsException {
+    public ApiResponse<RegisterResponseDto> register(
+            @CurrentUser JwtUser jwtUser,
+            @RequestBody AdminRegisterRequestDto req) throws LoginAlreadyExistsException {
+        System.out.println("current user: " + jwtUser.getUsername());
         RoleDto role = authRolesHandler.getById(req.getRoleId());
-        return handler.handle(req, role);
+
+        return ApiResponse.ok(handler.handle(req, role));
     }
 
 }

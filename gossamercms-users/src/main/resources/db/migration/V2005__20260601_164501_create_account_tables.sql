@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS account_mappings (
                                   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
                                   "expiresAt" TIMESTAMP NULL,
 
-                                  UNIQUE ("userId", "accountId"),
+                                  UNIQUE ("userContextId", "accountId", "roleId"),
 
                                   FOREIGN KEY ("userContextId") REFERENCES user_contexts("id"),
                                   FOREIGN KEY ("accountId") REFERENCES accounts("id"),
