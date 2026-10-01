@@ -77,6 +77,7 @@ public class UsersDbService extends BaseDbService<User, UserDto> {
                 u.id,
                 u.firstname,
                 u.lastname,
+                u."createdOn",
                 uc."contextType",
                 li."lastLoginAt",
                 li.identifier as email,
@@ -147,6 +148,9 @@ System.out.println("Executing directory query with SQL: " + sql);
                         .id(rs.getObject("id", UUID.class))
                         .firstname(rs.getString("firstname"))
                         .lastname(rs.getString("lastname"))
+                        .createdOn( rs.getTimestamp("createdOn") != null
+                                ? rs.getTimestamp("createdOn").toInstant()
+                                : null)
                         .email(rs.getString("email"))
                         .contextType(rs.getString("contextType"))
                         .lastLoginAt(

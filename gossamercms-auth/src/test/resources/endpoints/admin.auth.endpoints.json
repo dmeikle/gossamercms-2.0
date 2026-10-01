@@ -13,38 +13,34 @@
     {
       "name": "start masquerade",
       "method": "POST",
-      "url": "/admin/auth/start-masquerading/df5b2811-12fc-45f1-ab94-f9a6ab1ffd0d",
+      "url": "/admin/auth/start-masquerading/633ca6ad-ea38-49d3-8026-9721d3c409c6",
       "expectedStatus": 200,
       "ignoreFields": [
         "token",
         "refreshToken"
       ],
       "expectedBody": {
-        "userId": "df5b2811-12fc-45f1-ab94-f9a6ab1ffd0d",
-        "email": "test.user204@example.com",
-        "firstname": "John",
-        "lastname": "Doe",
-        "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZjViMjgxMS0xMmZjLTQ1ZjEtYWI5NC1mOWE2YWIxZmZkMGQiLCJpYXQiOjE3OTA3MzA4NDgsImV4cCI6MTc5MDczNDQ0OCwiZGVjYXlEYXRlIjoxNzkwNzM0NDQ4ODIxLCJ1c2VySWQiOiJkZjViMjgxMS0xMmZjLTQ1ZjEtYWI5NC1mOWE2YWIxZmZkMGQiLCJ1c2VyQ29udGV4dElkIjoiOWRkZDU1MTAtNTcwMS00OTlkLTgzMWItMTE1OGVmMTRmNmNlIiwic2Vzc2lvbklkIjoiRDA2MENFRTE2QTlFNDYyRDk1NjY5RDUzMDBCMDREMjMiLCJpZGVudGlmaWVyIjoidGVzdC51c2VyMjA0QGV4YW1wbGUuY29tIiwicm9sZXMiOlsidmlld2VyIl0sInBlcm1pc3Npb25zIjpbImNvbnRlbnQudmlldyIsIm1lZGlhLnZpZXciXSwiYWRtaW5Vc2VySWQiOiJiNTcxZDEwMS1iOWQzLTQyYjctYmE0OC0xMThmOWI1YjVmM2UiLCJhZG1pbklkZW50aWZpZXIiOiJ0ZXN0LnVzZXI2NEBleGFtcGxlLmNvbSIsIm1hc3F1ZXJhZGluZ1VzZXJJZCI6ImRmNWIyODExLTEyZmMtNDVmMS1hYjk0LWY5YTZhYjFmZmQwZCIsImFkbWluUm9sZXMiOlsic3lzdGVtLWFkbWluIl0sImFkbWluVXNlckNvbnRleHRJZCI6ImZlNTljZjBlLTA4Y2QtNGUzNS1iMTUyLWE1MjFmYzgxZGNlZSIsImFkbWluUGVybWlzc2lvbnMiOlsiY29udGVudC52aWV3IiwiY29udGVudC5jcmVhdGUiLCJjb250ZW50LnVwZGF0ZSIsImNvbnRlbnQuZGVsZXRlIiwiY29udGVudC5wdWJsaXNoIiwibWVkaWEudmlldyIsIm1lZGlhLnVwbG9hZCIsIm1lZGlhLmRlbGV0ZSIsInVzZXJzLnZpZXciLCJ1c2Vycy5tYW5hZ2UiLCJyb2xlcy52aWV3Iiwicm9sZXMubWFuYWdlIiwicmJhYy52aWV3IiwicmJhYy5tYW5hZ2UiLCJhdWRpdC52aWV3Iiwic3lzdGVtLm1hbmFnZSIsInN5c3RlbS5zZXR0aW5ncy52aWV3Iiwic3lzdGVtLnNldHRpbmdzLnVwZGF0ZSIsInVzZXJzLmNyZWF0ZSIsInVzZXJzLnVwZGF0ZSIsInVzZXJzLmRlbGV0ZSIsInVzZXJzLnJvbGVzLmFzc2lnbiIsInVzZXJzLnJvbGVzLnJlbW92ZSIsInJvbGVzLmNyZWF0ZSIsInJvbGVzLnVwZGF0ZSIsInJvbGVzLmRlbGV0ZSIsInJvbGVzLnBlcm1pc3Npb25zLmFzc2lnbiIsInJvbGVzLnBlcm1pc3Npb25zLnJlbW92ZSIsInJiYWMuYXNzaWduIiwicmJhYy5yZXZva2UiLCJkZXZ0b29scy52aWV3IiwiZGV2dG9vbHMuZXhlY3V0ZSJdfQ._sfTr-oY-qn5f-GeaeO3LHlR6q8kH89zYHu9M6tkAhk",
-        "refreshToken": "Izy6sANJzl1GdPrT9DBCzI0APpv4OvDcRfqA6iNaSXo",
+        "userId": "633ca6ad-ea38-49d3-8026-9721d3c409c6",
+        "email": "test.user250@example.com",
+        "firstname": "Test1",
+        "lastname": "User",
+        "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2MzNjYTZhZC1lYTM4LTQ5ZDMtODAyNi05NzIxZDNjNDA5YzYiLCJpYXQiOjE3OTA4MTMyOTQsImV4cCI6MTc5MDgxNjg5NCwiZGVjYXlEYXRlIjoxNzkwODE2ODk0ODg4LCJ1c2VySWQiOiI2MzNjYTZhZC1lYTM4LTQ5ZDMtODAyNi05NzIxZDNjNDA5YzYiLCJ1c2VyQ29udGV4dElkIjoiY2VjNDExZjgtNDY5Ni00ZGRiLWIzYjItNWE4MDhkOGJlMGFmIiwic2Vzc2lvbklkIjoiNUYxQTkwMUUyMkNDMkM4MDg4NTkwOTNGM0E3REIyMUIiLCJpZGVudGlmaWVyIjoidGVzdC51c2VyMjUwQGV4YW1wbGUuY29tIiwicm9sZXMiOlsidmlld2VyIl0sInBlcm1pc3Npb25zIjpbImNvbnRlbnQudmlldyIsIm1lZGlhLnZpZXciXSwiYWRtaW5Vc2VySWQiOiJiNTcxZDEwMS1iOWQzLTQyYjctYmE0OC0xMThmOWI1YjVmM2UiLCJhZG1pbklkZW50aWZpZXIiOiJ0ZXN0LnVzZXI2NEBleGFtcGxlLmNvbSIsIm1hc3F1ZXJhZGluZ1VzZXJJZCI6IjYzM2NhNmFkLWVhMzgtNDlkMy04MDI2LTk3MjFkM2M0MDljNiIsImFkbWluUm9sZXMiOlsic3lzdGVtLWFkbWluIl0sImFkbWluVXNlckNvbnRleHRJZCI6ImZlNTljZjBlLTA4Y2QtNGUzNS1iMTUyLWE1MjFmYzgxZGNlZSIsImFkbWluUGVybWlzc2lvbnMiOlsiY29udGVudC52aWV3IiwiY29udGVudC5jcmVhdGUiLCJjb250ZW50LnVwZGF0ZSIsImNvbnRlbnQuZGVsZXRlIiwiY29udGVudC5wdWJsaXNoIiwibWVkaWEudmlldyIsIm1lZGlhLnVwbG9hZCIsIm1lZGlhLmRlbGV0ZSIsInVzZXJzLnZpZXciLCJ1c2Vycy5tYW5hZ2UiLCJyb2xlcy52aWV3Iiwicm9sZXMubWFuYWdlIiwicmJhYy52aWV3IiwicmJhYy5tYW5hZ2UiLCJhdWRpdC52aWV3Iiwic3lzdGVtLm1hbmFnZSIsInN5c3RlbS5zZXR0aW5ncy52aWV3Iiwic3lzdGVtLnNldHRpbmdzLnVwZGF0ZSIsInVzZXJzLmNyZWF0ZSIsInVzZXJzLnVwZGF0ZSIsInVzZXJzLmRlbGV0ZSIsInVzZXJzLnJvbGVzLmFzc2lnbiIsInVzZXJzLnJvbGVzLnJlbW92ZSIsInJvbGVzLmNyZWF0ZSIsInJvbGVzLnVwZGF0ZSIsInJvbGVzLmRlbGV0ZSIsInJvbGVzLnBlcm1pc3Npb25zLmFzc2lnbiIsInJvbGVzLnBlcm1pc3Npb25zLnJlbW92ZSIsInJiYWMuYXNzaWduIiwicmJhYy5yZXZva2UiLCJkZXZ0b29scy52aWV3IiwiZGV2dG9vbHMuZXhlY3V0ZSJdfQ.mL66ARp_UH4fUz49vH8dtUlOnqKTwTIdHBlbLSCuUnk",
+        "refreshToken": "Ux0qBYTx1-FopJccVxp39ZsfRBgFcb8zZna-hm73M1A",
         "contexts": [
           {
-            "id": "9ddd5510-5701-499d-831b-1158ef14f6ce",
-            "userId": "df5b2811-12fc-45f1-ab94-f9a6ab1ffd0d",
+            "id": "cec411f8-4696-4ddb-b3b2-5a808d8be0af",
+            "userId": "633ca6ad-ea38-49d3-8026-9721d3c409c6",
             "roleId": "6e8c1f3c-dc9f-470d-b203-83a43154cbac",
-            "contextType": "patient",
+            "contextType": "default",
             "metadata": {
-              "homepage": "/patient/dashboard",
+              "theme": "light",
+              "homepage": "/members/dashboard",
               "language": "en-US",
               "timezone": "UTC",
               "defaultContext": true,
-              "organizationId": "23bf84ee-1060-459c-82b2-a52d004af01f",
-              "dataSharingConsent": false,
-              "onboardingCompleted": false,
-              "telemedicineEnabled": true,
-              "appointmentReminders": true,
-              "notificationsEnabled": true
+              "newFeatureFlag": true
             },
-            "createdAt": "2026-07-23T04:45:50.538119Z",
+            "createdAt": "2026-10-01T05:11:42.548652Z",
             "default": false
           }
         ]

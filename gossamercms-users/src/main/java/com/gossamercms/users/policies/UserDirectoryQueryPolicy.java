@@ -10,29 +10,25 @@ public final class UserDirectoryQueryPolicy {
     }
 
     /**
-     * Whitelisted sortable columns (DB/SQL level names)
-     */
-    public static final Set<String> ALLOWED_SORTS = Set.of(
-            "firstname",
-            "lastname",
-            "email",
-            "lastLoginAt",
-            "contextType",
-            "id"
-    );
-
-    /**
      * Optional: map API sort keys -> SQL columns
      * (safer than exposing DB names directly)
      */
     public static final Map<String, String> SORT_MAPPING = Map.of(
             "firstName", "u.firstname",
+            "firstname", "u.firstname",
             "lastName", "u.lastname",
+            "lastname", "u.lastname",
+            "createdOn", "u.\"createdOn\"",
             "email", "email",
             "lastLoginAt", "li.\"lastLoginAt\"",
             "contextType", "uc.\"contextType\"",
             "id","u.id"
     );
+
+    /**
+     * Whitelisted sortable API keys.
+     */
+    public static final Set<String> ALLOWED_SORTS = SORT_MAPPING.keySet();
 
     public static boolean isAllowedSort(String field) {
         return ALLOWED_SORTS.contains(field);
