@@ -142,7 +142,7 @@ INSERT INTO login_identities (
 ) VALUES (
              gen_random_uuid(),
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
-             'test.user64@example.com',
+             'test.user1@example.com',
              'auth0',
              'auth0|6a49a876309ecf411451659b',
              true,

@@ -1,12 +1,14 @@
 package com.gossamercms.mvc.data;
 
 import com.gossamercms.mvc.exceptions.ApiException;
+import com.gossamercms.mvc.exceptions.DbSaveException;
 import com.gossamercms.mvc.exceptions.NotFoundException;
 import com.gossamercms.mvc.helpers.JsonbHelper;
 import com.gossamercms.mvc.helpers.annotations.JsonColumn;
 import com.gossamercms.mvc.models.BaseModel;
 import com.gossamercms.mvc.models.ModelMeta;
 import com.gossamercms.mvc.util.ReflectionUtils;
+import org.postgresql.util.PSQLException;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -186,9 +188,26 @@ public abstract class BaseDbService<
             ds.save(meta.table(), params);
         }catch (Exception e) {
             e.printStackTrace();
-            throw e;
+            throw new DbSaveException(extractSafeMessage(e));
         }
         return mapToDto(entity);
+    }
+
+    //We don't want to return the sql to the browser
+    private String extractSafeMessage(Exception e) {
+        Throwable cause = e;
+        while (cause != null) {
+            if (cause instanceof PSQLException psqlException) {
+                String serverMessage = psqlException.getServerErrorMessage() != null
+                        ? psqlException.getServerErrorMessage().getMessage()
+                        : null;
+                if (serverMessage != null) {
+                    return serverMessage;
+                }
+            }
+            cause = cause.getCause();
+        }
+        return e.getMessage();
     }
 
     protected Map<String, Object> buildParamsForSave(EntityType entity) {

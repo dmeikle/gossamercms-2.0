@@ -10,6 +10,7 @@ import com.gossamercms.auth.dtos.LoginResult;
 import com.gossamercms.auth.dtos.RoleDto;
 import com.gossamercms.auth.dtos.requests.LoginRequestDto;
 import com.gossamercms.auth.dtos.responses.LoginResponseDto;
+import com.gossamercms.auth.exceptions.AuthProviderLoginNotFoundException;
 import com.gossamercms.auth.factories.RoleClaimsFactory;
 import com.gossamercms.mvc.annotations.ModuleHandler;
 import com.gossamercms.mvc.data.ListResultset;
@@ -74,7 +75,7 @@ public class LoginHandler {
 
         if (identity == null) {
             System.out.println("Identity not found for provider 'auth0' and providerUserId: " + "auth0UserId");
-            throw new RuntimeException("Identity not found for Auth0 user");
+            throw new AuthProviderLoginNotFoundException(req.email());
         }
 
         // 3. Load user
