@@ -43,7 +43,7 @@ INSERT INTO user_contexts (
              'fe59cf0e-08cd-4e35-b152-a521fc81dcee'::uuid,
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
              'admin',
-             '{"theme":"dark","language":"en-US","timezone":"UTC","onboardingCompleted":false,"defaultContext":true,"homepage":"/admin/dashboard"}'::jsonb,
+             '{"theme":"dark","language":"en-US","timezone":"UTC","onboardingCompleted":false,"defaultContext":true,"homepage":"/dashboard-pages/front-desk-dashboard", "clinicId": "686d2af0-0e94-4863-a0cb-887be93c8778"}'::jsonb,
              'ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6',
           NOW(),
              true
