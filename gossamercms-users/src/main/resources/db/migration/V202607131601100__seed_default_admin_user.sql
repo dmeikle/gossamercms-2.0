@@ -24,7 +24,7 @@ INSERT INTO user_roles (
     "roleId",
     "assignedAt"
 ) VALUES (
-             gen_random_uuid(),
+             '87e377f6-b90c-4213-8aab-010c83dfe5d4',
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
              'ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6'::uuid,
              NOW()
@@ -67,7 +67,7 @@ INSERT INTO user_addresses (
     "countryCode",
     "isDefault"
 ) VALUES (
-             gen_random_uuid(),
+             '06745cad-cf13-4d4d-82fa-2cc1693611f3',
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
              'SHIPPING',
              '123 Main Street',
@@ -92,7 +92,7 @@ INSERT INTO user_addresses (
     "countryCode",
     "isBilling"
 ) VALUES (
-             gen_random_uuid(),
+             'fb3126ec-19af-4c0b-b8d6-4217a3af0ab8',
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
              'BILLING',
              '500 Burrard Street',
@@ -117,7 +117,7 @@ INSERT INTO user_telephone (
     preferred,
     "createdOn"
 ) VALUES (
-             gen_random_uuid(),
+             '6f646964-1058-4add-b33e-4c0106fc56c6',
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
              '+1',
              '604-123-1234',
@@ -140,7 +140,7 @@ INSERT INTO login_identities (
     type,
     "createdOn"
 ) VALUES (
-             gen_random_uuid(),
+             'a075c8ed-6d6e-4594-91ff-9b5a16e84ad3',
              'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
              'test.user1@example.com',
              'auth0',
