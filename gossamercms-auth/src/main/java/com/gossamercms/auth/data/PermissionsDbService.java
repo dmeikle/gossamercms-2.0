@@ -129,7 +129,7 @@ public class PermissionsDbService extends BaseDbService<Permission, PermissionDt
                         countSql,
                         params,
                         Map.of(
-                                "roleId", "rp.\"roleId\""
+                                "roleId", "rp.roleId"
                         ),
                         Collections.emptyMap(),
                         1,

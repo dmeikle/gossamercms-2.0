@@ -1,3 +1,10 @@
+## Creating an Endpoints Test File
+
+The system only needs a json body. The "auth" element is for the controller to login
+and get an authorization token. This token is attached to the request headers as a Bearer token.
+
+```aiignore
+
 {
   "auth": {
     "login": {
@@ -28,3 +35,5 @@
 
   ]
 }
+
+```

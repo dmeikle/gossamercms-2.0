@@ -1,0 +1,59 @@
+{
+  "auth": {
+    "login": {
+      "url": "/auth/login",
+      "email": "test.user1@example.com",
+      "password": "SuperSecurePass123!"
+    }
+  },
+  "beforeEachSql": [
+
+  ],
+  "tests": [
+    {
+      "name": "change new context",
+      "method": "POST",
+      "url": "/auth/sessions/context/5d9f516b-f218-4eea-831b-5164df6b263c",
+      "expectedStatus": 200,
+      "ignoreFields": [
+        "token"
+      ],
+      "storeResponseFields": {
+
+      },
+      "expectedBody": {
+        "success": true,
+        "data": {
+          "userId": "b571d101-b9d3-42b7-ba48-118f9b5b5f3e",
+          "contextId": "5d9f516b-f218-4eea-831b-5164df6b263c",
+          "contextType": "system-admin",
+          "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNTcxZDEwMS1iOWQzLTQyYjctYmE0OC0xMThmOWI1YjVmM2UiLCJpYXQiOjE3OTA5Njk3NjksImV4cCI6MTc5MDk3MzM2OSwiZGVjYXlEYXRlIjoxNzkwOTczMzY5NTMxLCJ1c2VySWQiOiJiNTcxZDEwMS1iOWQzLTQyYjctYmE0OC0xMThmOWI1YjVmM2UiLCJ1c2VyQ29udGV4dElkIjoiNWQ5ZjUxNmItZjIxOC00ZWVhLTgzMWItNTE2NGRmNmIyNjNjIiwic2Vzc2lvbklkIjoiOTg5QkUxRkIyOUEyODkxRkJFRjVCMTYzNEEyMkVDOTQiLCJpZGVudGlmaWVyIjoidGVzdC51c2VyMUBleGFtcGxlLmNvbSIsInJvbGVzIjpbInN5c3RlbS1hZG1pbiJdLCJwZXJtaXNzaW9ucyI6WyJ1c2Vycy5tYW5hZ2UiLCJyb2xlcy5tYW5hZ2UiLCJyYmFjLm1hbmFnZSIsInN5c3RlbS5tYW5hZ2UiLCJzeXN0ZW0uc2V0dGluZ3MudmlldyIsInN5c3RlbS5zZXR0aW5ncy51cGRhdGUiLCJ1c2Vycy52aWV3IiwidXNlcnMuY3JlYXRlIiwidXNlcnMudXBkYXRlIiwidXNlcnMuZGVsZXRlIiwidXNlcnMucm9sZXMuYXNzaWduIiwidXNlcnMucm9sZXMucmVtb3ZlIiwicm9sZXMudmlldyIsInJvbGVzLmNyZWF0ZSIsInJvbGVzLnVwZGF0ZSIsInJvbGVzLmRlbGV0ZSIsInJvbGVzLnBlcm1pc3Npb25zLmFzc2lnbiIsInJvbGVzLnBlcm1pc3Npb25zLnJlbW92ZSIsImNvbnRlbnQudmlldyIsImNvbnRlbnQuY3JlYXRlIiwiY29udGVudC51cGRhdGUiLCJjb250ZW50LmRlbGV0ZSIsImNvbnRlbnQucHVibGlzaCIsIm1lZGlhLnZpZXciLCJtZWRpYS51cGxvYWQiLCJtZWRpYS5kZWxldGUiLCJyYmFjLnZpZXciLCJyYmFjLmFzc2lnbiIsInJiYWMucmV2b2tlIiwiYXVkaXQudmlldyIsImRldnRvb2xzLnZpZXciLCJkZXZ0b29scy5leGVjdXRlIl19.AeLv9ydnP99lrulxICnHWoRuZKUUWf-GdHfA0RYW-K0"
+        },
+        "message": null
+      }
+    },
+    {
+      "name": "revert to old context",
+      "method": "POST",
+      "url": "/auth/sessions/context/fe59cf0e-08cd-4e35-b152-a521fc81dcee",
+      "expectedStatus": 200,
+      "ignoreFields": [
+        "token"
+      ],
+      "storeResponseFields": {
+
+      },
+      "expectedBody": {
+        "success": true,
+        "data": {
+          "userId": "b571d101-b9d3-42b7-ba48-118f9b5b5f3e",
+          "contextId": "fe59cf0e-08cd-4e35-b152-a521fc81dcee",
+          "contextType": "system-admin",
+          "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNTcxZDEwMS1iOWQzLTQyYjctYmE0OC0xMThmOWI1YjVmM2UiLCJpYXQiOjE3OTA5NzA5NTcsImV4cCI6MTc5MDk3NDU1NywiZGVjYXlEYXRlIjoxNzkwOTc0NTU3NDU1LCJ1c2VySWQiOiJiNTcxZDEwMS1iOWQzLTQyYjctYmE0OC0xMThmOWI1YjVmM2UiLCJ1c2VyQ29udGV4dElkIjoiZmU1OWNmMGUtMDhjZC00ZTM1LWIxNTItYTUyMWZjODFkY2VlIiwic2Vzc2lvbklkIjoiOTg5QkUxRkIyOUEyODkxRkJFRjVCMTYzNEEyMkVDOTQiLCJpZGVudGlmaWVyIjoidGVzdC51c2VyMUBleGFtcGxlLmNvbSIsInJvbGVzIjpbInN5c3RlbS1hZG1pbiJdLCJwZXJtaXNzaW9ucyI6WyJ1c2Vycy5tYW5hZ2UiLCJyb2xlcy5tYW5hZ2UiLCJyYmFjLm1hbmFnZSIsInN5c3RlbS5tYW5hZ2UiLCJzeXN0ZW0uc2V0dGluZ3MudmlldyIsInN5c3RlbS5zZXR0aW5ncy51cGRhdGUiLCJ1c2Vycy52aWV3IiwidXNlcnMuY3JlYXRlIiwidXNlcnMudXBkYXRlIiwidXNlcnMuZGVsZXRlIiwidXNlcnMucm9sZXMuYXNzaWduIiwidXNlcnMucm9sZXMucmVtb3ZlIiwicm9sZXMudmlldyIsInJvbGVzLmNyZWF0ZSIsInJvbGVzLnVwZGF0ZSIsInJvbGVzLmRlbGV0ZSIsInJvbGVzLnBlcm1pc3Npb25zLmFzc2lnbiIsInJvbGVzLnBlcm1pc3Npb25zLnJlbW92ZSIsImNvbnRlbnQudmlldyIsImNvbnRlbnQuY3JlYXRlIiwiY29udGVudC51cGRhdGUiLCJjb250ZW50LmRlbGV0ZSIsImNvbnRlbnQucHVibGlzaCIsIm1lZGlhLnZpZXciLCJtZWRpYS51cGxvYWQiLCJtZWRpYS5kZWxldGUiLCJyYmFjLnZpZXciLCJyYmFjLmFzc2lnbiIsInJiYWMucmV2b2tlIiwiYXVkaXQudmlldyIsImRldnRvb2xzLnZpZXciLCJkZXZ0b29scy5leGVjdXRlIl19.IMWsBqv-JbVEagrnVJeldeBEGFZf69QVsjBYzwUaN7w"
+        },
+        "message": null
+      }
+    }
+
+  ]
+}
