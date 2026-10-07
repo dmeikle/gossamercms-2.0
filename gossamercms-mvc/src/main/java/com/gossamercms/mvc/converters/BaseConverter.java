@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
 import com.gossamercms.mvc.data.BaseDbService;
 import com.gossamercms.mvc.data.DtoWithId;
+import com.gossamercms.mvc.exceptions.ApiException;
 import com.gossamercms.mvc.exceptions.NotFoundException;
 import lombok.NonNull;
 
@@ -26,7 +27,12 @@ public abstract class BaseConverter<D extends DtoWithId> implements Converter<St
     public D convert(@NonNull String source) {
         System.out.println("************ BaseConverter loading " + dtoClass.getSimpleName() + " with id " + source + " ************************");
         UUID id = UUID.fromString(source);
-        D dto = dbService.getById(id);
+        D dto = null;
+        try{
+            dto = dbService.getById(id);
+        }catch (Exception e) {
+            throw new NotFoundException(source);
+        }
         if (dto == null) {
             throw new NotFoundException(id.toString()); // or whatever your 404 exception is
         }
