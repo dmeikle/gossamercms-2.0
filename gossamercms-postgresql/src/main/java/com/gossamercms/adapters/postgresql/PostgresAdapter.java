@@ -633,11 +633,11 @@ public class PostgresAdapter implements DataSourceAdapter {
 
                         if (parameter.endsWith("Id") && isUuid(filter.value())) {
                             clauses.add(
-                                    column + " = CAST(:" + parameter + " AS UUID)"
+                                    filter.prefix() + column + " = CAST(:" + parameter + " AS UUID)"
                             );
                         } else {
                             clauses.add(
-                                    column + " = :" + parameter
+                                    filter.prefix() + column + " = :" + parameter
                             );
                         }
 
@@ -646,62 +646,67 @@ public class PostgresAdapter implements DataSourceAdapter {
 
                     case LIKE ->
                             clauses.add(
-                                    column + " LIKE :" + parameter
+                                    filter.prefix() + column + " LIKE :" + parameter
                             );
 
 
                     case ILIKE ->
                             clauses.add(
-                                    column + " ILIKE :" + parameter
+                                    filter.prefix() + column + " ILIKE :" + parameter
                             );
 
 
                     case GREATER_THAN ->
                             clauses.add(
-                                    column + " > :" + parameter
+                                    filter.prefix() + column + " > :" + parameter
                             );
 
 
                     case GREATER_THAN_OR_EQUAL ->
                             clauses.add(
-                                    column + " >= :" + parameter
+                                    filter.prefix() + column + " >= :" + parameter
                             );
 
 
                     case LESS_THAN ->
                             clauses.add(
-                                    column + " < :" + parameter
+                                    filter.prefix() + column + " < :" + parameter
                             );
 
 
                     case LESS_THAN_OR_EQUAL ->
                             clauses.add(
-                                    column + " <= :" + parameter
+                                    filter.prefix() + column + " <= :" + parameter
                             );
 
 
                     case IN ->
                             clauses.add(
-                                    column + " IN (:" + parameter + ")"
+                                    filter.prefix() + column + " IN (:" + parameter + ")"
                             );
 
 
                     case NOT_IN ->
                             clauses.add(
-                                    column + " NOT IN (:" + parameter + ")"
+                                    filter.prefix() + column + " NOT IN (:" + parameter + ")"
                             );
 
 
                     case IS_NULL ->
                             clauses.add(
-                                    column + " IS NULL"
+                                    filter.prefix() + column + " IS NULL"
                             );
 
 
                     case IS_NOT_NULL ->
                             clauses.add(
-                                    column + " IS NOT NULL"
+                                    filter.prefix() + column + " IS NOT NULL"
                             );
+
+                    case EQUALS_DATE ->
+                        clauses.add(
+                                filter.prefix() + column + "::date = CAST(:"+parameter + " AS date)"
+                        );
                 }
             }
         }
@@ -1044,6 +1049,11 @@ public class PostgresAdapter implements DataSourceAdapter {
         return sql.substring(0, index)
                 + " WHERE " + whereClause + " "
                 + sql.substring(index);
+    }
+
+
+    private void handleFilterTypes(String filterType, Object value) {
+
     }
     private Map<String,Object> normalizeFilters(
             Map<String,Object> filters

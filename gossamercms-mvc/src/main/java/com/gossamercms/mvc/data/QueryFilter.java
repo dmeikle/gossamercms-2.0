@@ -3,8 +3,12 @@ package com.gossamercms.mvc.data;
 public record QueryFilter(
         String field,
         Operator operator,
-        Object value
+        Object value,
+        String prefix
 ) {
+    public QueryFilter(String field, Operator operator, Object value) {
+        this(field, operator, value, "");
+    }
 
     public enum Operator {
         EQUALS,
@@ -17,7 +21,8 @@ public record QueryFilter(
         IN,
         NOT_IN,
         IS_NULL,
-        IS_NOT_NULL
+        IS_NOT_NULL,
+        EQUALS_DATE
     }
 
 
@@ -65,5 +70,10 @@ public record QueryFilter(
                 Operator.IS_NULL,
                 null
         );
+    }
+
+    @Override
+    public String prefix() {
+        return prefix == null || prefix.isEmpty() ? "" : prefix + ".";
     }
 }

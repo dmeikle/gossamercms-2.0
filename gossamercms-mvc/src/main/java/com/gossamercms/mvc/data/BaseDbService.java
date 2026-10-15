@@ -181,6 +181,18 @@ public abstract class BaseDbService<
             throw new RuntimeException("Failed to set createdAt", e);
         }
 
+        // createdBy
+        try {
+            Field createdByField = entity.getClass().getDeclaredField("createdBy");
+            createdByField.setAccessible(true);
+            if (createdByField.get(entity) == null) {
+                createdByField.set(entity, createdBy);
+            }
+        } catch (NoSuchFieldException ignored) {
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set createdBy", e);
+        }
+
         // Build params (JSONB included)
         Map<String, Object> params = buildParamsForSave(entity);
         try {
