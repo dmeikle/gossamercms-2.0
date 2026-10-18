@@ -82,7 +82,9 @@ public class RbacAutoConfig {
             Object principal = authentication.getPrincipal();
 
             if (principal instanceof JwtUser jwtUser) {
-                return jwtUser.getUserId();
+                System.out.println("getting principal. userId: " + jwtUser.getUserId());
+                System.out.println("getting principal. userContextId: " + jwtUser.getUserContextId());
+                return jwtUser.getUserContextId();
             }
 
             throw new ForbiddenException("Authenticated principal is not a JwtUser");

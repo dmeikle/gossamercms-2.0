@@ -18,10 +18,10 @@ public class JwtClaimsMapper {
         String sessionId = extractString(claims.get("sessionId"));
         String[] roles = extractArray(claims.get("roles"));
         String[] permissions = extractArray(claims.get("permissions"));
-        String userContextId = extractString(claims.get("userContextId"));
+        UUID userContextId = extractUuid(claims.get("userContextId"));
         UUID adminUserId = extractUuid(claims.get("adminUserId"));
         UUID masqueradingUserId = extractUuid(claims.get("masqueradingUserId"));
-        String adminUserContextId = extractString(claims.get("adminUserContextId"));
+        UUID adminUserContextId = extractUuid(claims.get("adminUserContextId"));
         String adminIdentifier = extractString(claims.get("adminIdentifier"));
         String[] adminRoles = extractArray(claims.get("adminRoles"));
         String[] adminPermissions = extractArray(claims.get("adminPermissions"));

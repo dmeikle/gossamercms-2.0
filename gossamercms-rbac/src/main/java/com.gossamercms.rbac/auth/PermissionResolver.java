@@ -1,5 +1,6 @@
 package com.gossamercms.rbac.auth;
 
+import com.gossamercms.mvc.data.QueryFilter;
 import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.rbac.dtos.PermissionDto;
 import com.gossamercms.rbac.dtos.RoleDto;
@@ -31,13 +32,13 @@ public class PermissionResolver {
         this.roleDb = roleDb;
     }
 
-    public Set<String> resolvePermissions(UUID userId) {
+    public Set<String> resolvePermissions(UUID userContextId) {
 
         // 1. Load user roles
         QueryOptions userRoleOpts = new QueryOptions(
                 1,
                 Integer.MAX_VALUE,
-                Map.of("userId", userId),
+                Map.of("userContextId", userContextId),
                 Map.of()
         );
 
@@ -85,14 +86,19 @@ public class PermissionResolver {
                 .toList();
 
         // 3. Load permissions
-        QueryOptions permOpts = new QueryOptions(
-                1,
-                Integer.MAX_VALUE,
-                Map.of("id", permissionIds),
-                Map.of()
-        );
+//        QueryOptions permOpts = new QueryOptions(
+//                1,
+//                Integer.MAX_VALUE,
+//                Map.of("id", permissionIds),
+//                Map.of()
+//        );
+        QueryOptions permissionsOptions = QueryOptions.builder()
+                .queryFilters(List.of(
+                        new QueryFilter("id", QueryFilter.Operator.IN, permissionIds)
+                    )
+            ).build();
 
-        List<PermissionDto> permissions = permissionDb.getAll(permOpts).list();
+        List<PermissionDto> permissions = permissionDb.getAll(permissionsOptions).list();
 
         return permissions.stream()
                 .map(PermissionDto::getName)

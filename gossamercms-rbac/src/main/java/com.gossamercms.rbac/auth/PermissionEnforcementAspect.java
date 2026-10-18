@@ -32,9 +32,9 @@ public class PermissionEnforcementAspect {
             "@within(com.gossamercms.rbac.auth.RequireSuperAdmin) || " +
             "@annotation(com.gossamercms.rbac.auth.RequireSuperAdmin)")
     public void enforce(JoinPoint jp) {
+        UUID userContextId = currentUserProvider.getCurrentUserContextId();
 
-        UUID userId = currentUserProvider.getCurrentUserId();
-        Set<String> permissions = resolver.resolvePermissions(userId);
+        Set<String> permissions = resolver.resolvePermissions(userContextId);
 
         Method method = ((MethodSignature) jp.getSignature()).getMethod();
 
@@ -55,7 +55,8 @@ public class PermissionEnforcementAspect {
             role = method.getDeclaringClass().getAnnotation(RequireRole.class);
         }
         if (role != null) {
-            if (!permissions.contains("role:" + role.value())) {
+            System.out.println("checking role: " + role.value());
+            if (!permissions.contains(role.value())) {
                 throw new ForbiddenException("Role required: " + role.value());
             }
         }

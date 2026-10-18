@@ -18,10 +18,10 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
     private final String sessionid;
     private final String[] roles;
     private final String[] permissions;
-    private final String userContextId;
+    private final UUID userContextId;
     private final UUID adminUserId;
     private final UUID masqueradingUserId;
-    private final String adminUserContextId;
+    private final UUID adminUserContextId;
     private final String adminIdentifier;
     private final String[] adminRoles;
     private final String[] adminPermissions;
@@ -43,7 +43,7 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
             String[] roles,
             String[] permissions,
             String sessionId,
-            String userContextId
+            UUID userContextId
     ) {
         this(
                 userId,
@@ -67,10 +67,10 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
             String[] roles,
             String[] permissions,
             String sessionId,
-            String userContextId,
+            UUID userContextId,
             UUID adminUserId,
             UUID masqueradingUserId,
-            String adminUserContextId,
+            UUID adminUserContextId,
             String adminIdentifier,
             String[] adminRoles,
             String[] adminPermissions
@@ -140,7 +140,7 @@ public class JwtUser implements UserDetails, CurrentJwtUser {
         return true;
     }
 
-    public String getUserContextId() {
+    public UUID getUserContextId() {
         return userContextId;
     }
 

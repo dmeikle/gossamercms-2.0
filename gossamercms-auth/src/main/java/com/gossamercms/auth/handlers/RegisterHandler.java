@@ -12,6 +12,8 @@ import com.gossamercms.auth.factories.LoginIdentityFactory;
 import com.gossamercms.auth.factories.RoleClaimsFactory;
 import com.gossamercms.auth.models.LoginIdentity;
 import com.gossamercms.mvc.annotations.ModuleHandler;
+import com.gossamercms.mvc.data.QueryOptions;
+import com.gossamercms.rbac.services.UserRolesDbService;
 import com.gossamercms.security.services.JwtService;
 import com.gossamercms.security.shared.factories.JwtClaimsFactory;
 import com.gossamercms.users.api.*;
@@ -19,11 +21,13 @@ import com.gossamercms.users.config.UserContextDefaults;
 import com.gossamercms.users.data.*;
 import com.gossamercms.users.domain.*;
 import com.gossamercms.users.exceptions.LoginAlreadyExistsException;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@RequiredArgsConstructor
 @ModuleHandler
 public class RegisterHandler {
 
@@ -36,32 +40,33 @@ public class RegisterHandler {
     private final JwtService jwtService;
     private final AuthenticationProvider authProvider;
     private final RoleClaimsFactory roleClaimsFactory;
+    private final UserRolesDbService userRolesDbService;
 
     private final String DEFAULT_TYPE = "default";
     private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
 
-    public RegisterHandler(
-            UsersDbService usersDb,
-            LoginIdentityDbService identityDb,
-            UserAddressDbService addressDb,
-            UserTelephonesDbService telephonesDb,
-            UserContextsDbService contextsDb,
-            AccountMappingsDbService accountMappingsDbService,
-            RolesDbService rolesDbService,
-            RoleClaimsFactory roleClaimsFactory,
-            JwtService jwtService,
-            AuthenticationProvider authProvider
-    ) {
-        this.usersDb = usersDb;
-        this.identityDb = identityDb;
-        this.addressDb = addressDb;
-        this.telephonesDb = telephonesDb;
-        this.contextsDb = contextsDb;
-        this.accountMappingsDbService = accountMappingsDbService;
-        this.roleClaimsFactory = roleClaimsFactory;
-        this.jwtService = jwtService;
-        this.authProvider = authProvider;
-    }
+//    public RegisterHandler(
+//            UsersDbService usersDb,
+//            LoginIdentityDbService identityDb,
+//            UserAddressDbService addressDb,
+//            UserTelephonesDbService telephonesDb,
+//            UserContextsDbService contextsDb,
+//            AccountMappingsDbService accountMappingsDbService,
+//            RolesDbService rolesDbService,
+//            RoleClaimsFactory roleClaimsFactory,
+//            JwtService jwtService,
+//            AuthenticationProvider authProvider
+//    ) {
+//        this.usersDb = usersDb;
+//        this.identityDb = identityDb;
+//        this.addressDb = addressDb;
+//        this.telephonesDb = telephonesDb;
+//        this.contextsDb = contextsDb;
+//        this.accountMappingsDbService = accountMappingsDbService;
+//        this.roleClaimsFactory = roleClaimsFactory;
+//        this.jwtService = jwtService;
+//        this.authProvider = authProvider;
+//    }
 
     public RegisterResponseDto handle(AdminRegisterRequestDto req, RoleDto role) throws LoginAlreadyExistsException {
 
@@ -187,8 +192,17 @@ public class RegisterHandler {
 
 
         String [] permissionNames = roleClaimsFactory.getPermissionsByUserContext(userContext.getId());
+        // 8. get roles by usercontext
+        List<com.gossamercms.rbac.dtos.RoleDto> roles = userRolesDbService.getRolesByUserContextId(
+                QueryOptions.builder()
+                        .filters(Map.of("userContextId", userContext.getId()))
+                        .build()
+        ).list();
+        List<String> roleNames = roles.stream()
+                .map(com.gossamercms.rbac.dtos.RoleDto::getName)
+                .toList();
 
-        // 8. Generate JWT
+        // 9. Generate JWT
         String token = jwtService.generateToken(
                 savedUser.getId(),
                 JwtClaimsFactory.toClaims(
@@ -198,7 +212,8 @@ public class RegisterHandler {
                         identity.getIdentifier(),
                         role.getName(),
                         permissionNames
-                )
+                ),
+                roleNames
         );
 
         //9. Generate AccountMapping

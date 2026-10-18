@@ -10,6 +10,7 @@ import com.gossamercms.mvc.util.ReflectionUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -976,13 +977,17 @@ public class PostgresAdapter implements DataSourceAdapter {
         sql += " LIMIT :limit OFFSET :offset";
 
 
-        List<T> rows =
-                namedJdbcTemplate.query(
-                        sql,
-                        queryParams,
-                        mapper
-                );
-
+        List<T> rows = null;
+        try {
+            rows = namedJdbcTemplate.query(
+                    sql,
+                    queryParams,
+                    mapper
+            );
+        }catch (BadSqlGrammarException e) {
+                log.error("{}", e.getSql());
+                log.error("{}", e.getSQLException().getMessage());
+            }
 
         Long total =
                 namedJdbcTemplate.queryForObject(

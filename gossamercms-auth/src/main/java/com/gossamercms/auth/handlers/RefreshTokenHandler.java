@@ -11,6 +11,7 @@ import com.gossamercms.auth.models.RefreshToken;
 import com.gossamercms.mvc.annotations.ModuleHandler;
 import com.gossamercms.mvc.data.ListResultset;
 import com.gossamercms.mvc.data.QueryOptions;
+import com.gossamercms.rbac.services.UserRolesDbService;
 import com.gossamercms.security.services.JwtService;
 import com.gossamercms.security.shared.factories.JwtClaimsFactory;
 import com.gossamercms.users.api.UserContextDto;
@@ -18,15 +19,18 @@ import com.gossamercms.users.api.UserDto;
 import com.gossamercms.users.data.UserContextsDbService;
 import com.gossamercms.users.data.UsersDbService;
 import gossamercms.globals.events.users.UserLoggedInEvent;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @ModuleHandler
 public class RefreshTokenHandler  {
 
@@ -39,28 +43,29 @@ public class RefreshTokenHandler  {
     private final RoleClaimsFactory roleClaimsFactory;
     private final RolesDbService rolesDbService;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserRolesDbService userRolesDbService;
 
-    public RefreshTokenHandler(
-            RefreshTokensDbService dbService,
-            AuthenticationProvider authProvider,
-            LoginIdentityDbService identityDb,
-            UsersDbService usersDb,
-            UserContextsDbService userContextsDb,
-            RolesDbService rolesDbService,
-            RoleClaimsFactory roleClaimsFactory,
-            JwtService jwtService,
-            ApplicationEventPublisher eventPublisher
-    ) {
-        this.dbService = dbService;
-        this.authProvider = authProvider;
-        this.identityDb = identityDb;
-        this.usersDb = usersDb;
-        this.userContextsDb = userContextsDb;
-        this.rolesDbService = rolesDbService;
-        this.roleClaimsFactory = roleClaimsFactory;
-        this.jwtService = jwtService;
-        this.eventPublisher = eventPublisher;
-    }
+//    public RefreshTokenHandler(
+//            RefreshTokensDbService dbService,
+//            AuthenticationProvider authProvider,
+//            LoginIdentityDbService identityDb,
+//            UsersDbService usersDb,
+//            UserContextsDbService userContextsDb,
+//            RolesDbService rolesDbService,
+//            RoleClaimsFactory roleClaimsFactory,
+//            JwtService jwtService,
+//            ApplicationEventPublisher eventPublisher
+//    ) {
+//        this.dbService = dbService;
+//        this.authProvider = authProvider;
+//        this.identityDb = identityDb;
+//        this.usersDb = usersDb;
+//        this.userContextsDb = userContextsDb;
+//        this.rolesDbService = rolesDbService;
+//        this.roleClaimsFactory = roleClaimsFactory;
+//        this.jwtService = jwtService;
+//        this.eventPublisher = eventPublisher;
+//    }
 
     @Transactional
     public RefreshResult refresh(String refreshToken, String sessionId) {
@@ -112,7 +117,17 @@ public class RefreshTokenHandler  {
         String [] permissionNames = roleClaimsFactory.getPermissionsByUserContext(defaultContext.getId());
         RoleDto role = rolesDbService.getById(defaultContext.getRoleId());
 
-        // 6. Generate JWT
+        // 6. Get UserRoles
+        List<com.gossamercms.rbac.dtos.RoleDto> roles = userRolesDbService.getRolesByUserContextId(
+                QueryOptions.builder()
+                        .filters(Map.of("userContextId", defaultContext.getId()))
+                        .build()
+        ).list();
+        List<String> roleNames = roles.stream()
+                .map(com.gossamercms.rbac.dtos.RoleDto::getName)
+                .toList();
+
+        // 7. Generate JWT
         String token = jwtService.generateToken(
                 user.getId(),
                 JwtClaimsFactory.toClaims(
@@ -122,7 +137,8 @@ public class RefreshTokenHandler  {
                         identity.getIdentifier(),
                         role.getName(),
                         permissionNames
-                )
+                ),
+                roleNames
         );
         eventPublisher.publishEvent(new UserLoggedInEvent(
                 user.getId(),

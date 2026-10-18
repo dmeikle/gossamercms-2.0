@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
-
+        ex.printStackTrace();
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         String errorCode = "INTERNAL_ERROR";
         String message = "An unexpected error occurred.";

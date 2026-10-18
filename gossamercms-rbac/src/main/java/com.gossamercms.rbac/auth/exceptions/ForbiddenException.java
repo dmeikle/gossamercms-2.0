@@ -1,7 +1,11 @@
 package com.gossamercms.rbac.auth.exceptions;
 
-public class ForbiddenException extends RuntimeException {
+import com.gossamercms.mvc.exceptions.ApiException;
+import com.gossamercms.rbac.config.ExceptionCodes;
+import org.springframework.http.HttpStatus;
+
+public class ForbiddenException extends ApiException {
     public ForbiddenException(String message) {
-        super(message);
+        super(ExceptionCodes.INVALID_ROLE, message, HttpStatus.FORBIDDEN.value());
     }
 }

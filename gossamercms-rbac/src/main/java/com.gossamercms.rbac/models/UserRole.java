@@ -2,6 +2,7 @@ package com.gossamercms.rbac.models;
 
 import com.gossamercms.mvc.models.BaseModel;
 import com.gossamercms.mvc.models.ModelMeta;
+import com.gossamercms.rbac.dtos.UserRoleDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class UserRole implements BaseModel {
 
     private UUID id;
-    private UUID userId;
+    private UUID userContextId;
     private UUID roleId;
     private UUID assignedBy;
     private Instant assignedAt;
@@ -27,7 +28,7 @@ public class UserRole implements BaseModel {
             .table("user_roles")
             .datasource("postgres")
             .column("id", UUID.class)
-            .column("userId", UUID.class)
+            .column("userContextId", UUID.class)
             .column("roleId", UUID.class)
             .column("assignedBy", UUID.class)
             .column("assignedAt", Instant.class)
@@ -38,5 +39,16 @@ public class UserRole implements BaseModel {
     @Override
     public ModelMeta meta() {
         return META;
+    }
+
+    public UserRoleDto toDto() {
+        return UserRoleDto.builder()
+                .id(id)
+                .userContextId(userContextId)
+                .roleId(roleId)
+                .assignedAt(assignedAt)
+                .assignedBy(assignedBy)
+                .expiresAt(expiresAt)
+                .build();
     }
 }

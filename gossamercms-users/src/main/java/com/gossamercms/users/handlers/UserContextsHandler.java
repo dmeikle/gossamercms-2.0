@@ -6,6 +6,7 @@ import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.mvc.handlers.BaseHandler;
 import com.gossamercms.mvc.http.RequestContext;
 import com.gossamercms.mvc.http.ResponseBuilder;
+import com.gossamercms.rbac.services.UserRolesDbService;
 import com.gossamercms.security.jwt.JwtUser;
 import com.gossamercms.security.services.JwtService;
 import com.gossamercms.security.shared.factories.JwtClaimsFactory;
@@ -28,16 +29,19 @@ public class UserContextsHandler extends BaseHandler<UserContext, UserContextDto
     private final AccountMappingsDbService accountMappingsDb;
     private final JwtService jwtService;
     private final UsersDbService usersDb;
+    private final UserRolesDbService userRolesDbService;
 
     public UserContextsHandler(
             UserContextsDbService userContextsDb,
             AccountMappingsDbService accountMappingsDb,
             UsersDbService usersDb,
-            JwtService jwtService) {
+            JwtService jwtService,
+            UserRolesDbService userRolesDbService) {
         super(userContextsDb);
         this.accountMappingsDb = accountMappingsDb;
         this.jwtService = jwtService;
         this.usersDb = usersDb;
+        this.userRolesDbService = userRolesDbService;
     }
 
     /**
@@ -115,7 +119,16 @@ public class UserContextsHandler extends BaseHandler<UserContext, UserContextDto
         Map<String, Object> claims =
                 JwtClaimsFactory.toClaims(user.getId(), userContext.getId(), jwtUser.getSessionId(),  identifier, roleName, permissions);
 
-        String token = jwtService.generateToken(userId, claims);
+        List<com.gossamercms.rbac.dtos.RoleDto> roles = userRolesDbService.getRolesByUserContextId(
+                QueryOptions.builder()
+                        .filters(Map.of("userContextId", userContext.getId()))
+                        .build()
+        ).list();
+        List<String> roleNames = roles.stream()
+                .map(com.gossamercms.rbac.dtos.RoleDto::getName)
+                .toList();
+
+        String token = jwtService.generateToken(userId, claims, roleNames);
 
         return ResponseBuilder.ok(new SwitchContextResponseDto(
                 userId,

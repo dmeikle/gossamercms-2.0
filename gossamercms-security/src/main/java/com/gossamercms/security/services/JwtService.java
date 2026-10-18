@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,7 +26,11 @@ public class JwtService {
     // =========================
     // TOKEN GENERATION
     // =========================
-    public String generateToken(UUID userId, Map<String, Object> claims) {
+    public String generateToken(
+            UUID userId,
+            Map<String, Object> claims,
+            List<String> roles) {
+
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(ttlSeconds);
 
@@ -33,7 +38,8 @@ public class JwtService {
                 .subject(userId.toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(exp))
-                .claim("decayDate", exp.toEpochMilli());
+                .claim("decayDate", exp.toEpochMilli())
+                .claim("roles", roles);
 
         if (claims != null) {
             claims.forEach(builder::claim);

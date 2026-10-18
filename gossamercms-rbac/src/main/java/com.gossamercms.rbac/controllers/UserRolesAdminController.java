@@ -31,13 +31,14 @@ public class UserRolesAdminController extends BaseController<UserRole, UserRoleD
     // ------------------------------------------------------------
     // POST: Assign role to user
     // ------------------------------------------------------------
-    @PostMapping("/{userId}/roles/{roleId}")
+    @PostMapping("/{userContextId}/roles/{roleId}")
     public UserRoleDto assignRole(
-            @PathVariable UUID userId,
+            @PathVariable UUID userContextId,
             @PathVariable UUID roleId,
             @RequestAttribute("authUserId") UUID adminId
     ) {
-        return handler.assignRoleToUser(adminId, userId, roleId);
+
+        return handler.assignRoleToUser(adminId, userContextId, roleId);
     }
 
     // ------------------------------------------------------------

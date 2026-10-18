@@ -19,6 +19,6 @@ public interface CurrentJwtUser {
 
     String[] getPermissions();
 
-    String getUserContextId();
+    UUID getUserContextId();
 
 }

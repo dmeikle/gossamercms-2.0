@@ -9,6 +9,7 @@ import com.gossamercms.auth.factories.RoleClaimsFactory;
 import com.gossamercms.mvc.annotations.ModuleHandler;
 import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.mvc.exceptions.UnauthorizedStatusException;
+import com.gossamercms.rbac.services.UserRolesDbService;
 import com.gossamercms.security.jwt.JwtUser;
 import com.gossamercms.security.services.JwtService;
 import com.gossamercms.security.shared.factories.JwtClaimsFactory;
@@ -32,6 +33,7 @@ public class MasqueradeHandler {
     private final JwtService jwtService;
     private final RoleClaimsFactory roleClaimsFactory;
     private final RolesDbService rolesDbService;
+    private final UserRolesDbService userRolesDbService;
 
     public LoginResult start(JwtUser jwtUser, UserDto masqueradingUser, String fallbackSessionId) {
         JwtUser authenticatedUser = requireAuthenticatedUser(jwtUser);
@@ -44,7 +46,7 @@ public class MasqueradeHandler {
                 ? authenticatedUser.getAdminUserId()
                 : authenticatedUser.getUserId();
 
-        String adminUserContextId = authenticatedUser.isMasquerading()
+        UUID adminUserContextId = authenticatedUser.isMasquerading()
                 ? authenticatedUser.getAdminUserContextId()
                 : authenticatedUser.getUserContextId();
 
@@ -96,7 +98,7 @@ public class MasqueradeHandler {
         }
 
         UserDto adminUser = usersDb.getById(authenticatedUser.getAdminUserId());
-        UUID adminUserContextId = parseUuid(authenticatedUser.getAdminUserContextId());
+        UUID adminUserContextId = authenticatedUser.getAdminUserContextId();
 
         return issueLoginResult(
                 adminUser,
@@ -123,7 +125,14 @@ public class MasqueradeHandler {
         UserContextDto selectedContext = resolveContext(user, userContexts, preferredContextId);
         String[] permissionNames = roleClaimsFactory.getPermissionsByUserContext(selectedContext.getId());
         RoleDto role = rolesDbService.getById(selectedContext.getRoleId());
-
+        List<com.gossamercms.rbac.dtos.RoleDto> roles = userRolesDbService.getRolesByUserContextId(
+                QueryOptions.builder()
+                        .filters(Map.of("userContextId", selectedContext.getId()))
+                        .build()
+        ).list();
+        List<String> roleNames = roles.stream()
+                .map(com.gossamercms.rbac.dtos.RoleDto::getName)
+                .toList();
         String token = jwtService.generateToken(
                 user.getId(),
                 JwtClaimsFactory.toClaims(
@@ -134,7 +143,8 @@ public class MasqueradeHandler {
                         role.getName(),
                         permissionNames,
                         extraClaims
-                )
+                ),
+                roleNames
         );
 
         return new LoginResult(

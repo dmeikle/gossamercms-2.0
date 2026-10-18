@@ -7,14 +7,15 @@ import com.gossamercms.auth.data.LoginIdentityDbService;
 import com.gossamercms.auth.data.RolesDbService;
 import com.gossamercms.auth.dtos.LoginIdentityDto;
 import com.gossamercms.auth.dtos.LoginResult;
+import com.gossamercms.auth.dtos.PermissionDto;
 import com.gossamercms.auth.dtos.RoleDto;
 import com.gossamercms.auth.dtos.requests.LoginRequestDto;
-import com.gossamercms.auth.dtos.responses.LoginResponseDto;
 import com.gossamercms.auth.exceptions.AuthProviderLoginNotFoundException;
 import com.gossamercms.auth.factories.RoleClaimsFactory;
 import com.gossamercms.mvc.annotations.ModuleHandler;
 import com.gossamercms.mvc.data.ListResultset;
 import com.gossamercms.mvc.data.QueryOptions;
+import com.gossamercms.rbac.services.UserRolesDbService;
 import com.gossamercms.security.services.JwtService;
 import com.gossamercms.security.shared.factories.JwtClaimsFactory;
 import com.gossamercms.users.api.UserContextDto;
@@ -22,12 +23,14 @@ import com.gossamercms.users.api.UserDto;
 import com.gossamercms.users.data.UserContextsDbService;
 import com.gossamercms.users.data.UsersDbService;
 import gossamercms.globals.events.users.UserLoggedInEvent;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
-
+@RequiredArgsConstructor
 @ModuleHandler
 public class LoginHandler {
 
@@ -39,26 +42,27 @@ public class LoginHandler {
     private final RoleClaimsFactory roleClaimsFactory;
     private final RolesDbService rolesDbService;
     private final ApplicationEventPublisher eventPublisher;
-
-    public LoginHandler(
-            AuthenticationProvider authProvider,
-            LoginIdentityDbService identityDb,
-            UsersDbService usersDb,
-            UserContextsDbService userContextsDb,
-            RolesDbService rolesDbService,
-            RoleClaimsFactory roleClaimsFactory,
-            JwtService jwtService,
-            ApplicationEventPublisher eventPublisher
-    ) {
-        this.authProvider = authProvider;
-        this.identityDb = identityDb;
-        this.usersDb = usersDb;
-        this.userContextsDb = userContextsDb;
-        this.rolesDbService = rolesDbService;
-        this.roleClaimsFactory = roleClaimsFactory;
-        this.jwtService = jwtService;
-        this.eventPublisher = eventPublisher;
-    }
+    private final UserRolesDbService userRolesDbService;
+//
+//    public LoginHandler(
+//            AuthenticationProvider authProvider,
+//            LoginIdentityDbService identityDb,
+//            UsersDbService usersDb,
+//            UserContextsDbService userContextsDb,
+//            RolesDbService rolesDbService,
+//            RoleClaimsFactory roleClaimsFactory,
+//            JwtService jwtService,
+//            ApplicationEventPublisher eventPublisher
+//    ) {
+//        this.authProvider = authProvider;
+//        this.identityDb = identityDb;
+//        this.usersDb = usersDb;
+//        this.userContextsDb = userContextsDb;
+//        this.rolesDbService = rolesDbService;
+//        this.roleClaimsFactory = roleClaimsFactory;
+//        this.jwtService = jwtService;
+//        this.eventPublisher = eventPublisher;
+//    }
 
     public LoginResult handle(LoginRequestDto req, String sessionId) {
 
@@ -101,7 +105,17 @@ public class LoginHandler {
         String [] permissionNames = roleClaimsFactory.getPermissionsByUserContext(defaultContext.getId());
         RoleDto role = rolesDbService.getById(defaultContext.getRoleId());
 
-        // 6. Generate JWT
+        // 6. Get UserRoles
+        List<com.gossamercms.rbac.dtos.RoleDto> roles = userRolesDbService.getRolesByUserContextId(
+                QueryOptions.builder()
+                        .filters(Map.of("userContextId", defaultContext.getId()))
+                        .build()
+        ).list();
+        List<String> roleNames = roles.stream()
+                .map(com.gossamercms.rbac.dtos.RoleDto::getName)
+                .toList();
+
+        // 7. Generate JWT
         String token = jwtService.generateToken(
                 user.getId(),
                 JwtClaimsFactory.toClaims(
@@ -111,14 +125,15 @@ public class LoginHandler {
                         identity.getIdentifier(),
                         role.getName(),
                         permissionNames
-                )
+                ),
+                roleNames
         );
         eventPublisher.publishEvent(new UserLoggedInEvent(
                 user.getId(),
                 Instant.now()
         ));
 
-        //5. Return result
+        //8. Return result
         return new LoginResult(
                 user,
                 identity,

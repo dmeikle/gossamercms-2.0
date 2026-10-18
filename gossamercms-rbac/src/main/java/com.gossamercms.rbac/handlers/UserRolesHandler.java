@@ -56,11 +56,11 @@ public class UserRolesHandler extends BaseHandler<UserRole, UserRoleDto> {
     // ------------------------------------------------------------
     // ASSIGN ROLE TO USER
     // ------------------------------------------------------------
-    public UserRoleDto assignRoleToUser(UUID adminId, UUID userId, UUID roleId) {
+    public UserRoleDto assignRoleToUser(UUID adminId, UUID userContextId, UUID roleId) {
 
         UserRoleDto dto = UserRoleDto.builder()
                 .id(UUID.randomUUID())
-                .userId(userId)
+                .userContextId(userContextId)
                 .roleId(roleId)
                 .assignedBy(adminId)
                 .assignedAt(Instant.now())

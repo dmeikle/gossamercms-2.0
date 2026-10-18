@@ -17,18 +17,6 @@ INSERT INTO users (
              NOW()
          ) ON CONFLICT DO NOTHING;
 
--- Link user to role
-INSERT INTO user_roles (
-    id,
-    "userId",
-    "roleId",
-    "assignedAt"
-) VALUES (
-             '87e377f6-b90c-4213-8aab-010c83dfe5d4',
-             'b571d101-b9d3-42b7-ba48-118f9b5b5f3e'::uuid,
-             'ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6'::uuid,
-             NOW()
-         ) ON CONFLICT DO NOTHING;
 
 -- Insert user context (patient context)
 INSERT INTO user_contexts (
@@ -50,7 +38,20 @@ INSERT INTO user_contexts (
          ) ON CONFLICT DO NOTHING;
 
 INSERT INTO user_contexts (id, "userId", "contextType", metadata, "createdAt", "roleId", "isDefault") VALUES
- ('5d9f516b-f218-4eea-831b-5164df6b263c', 'b571d101-b9d3-42b7-ba48-118f9b5b5f3e', 'default', '{"theme": "dark", "clinic": "e6b820a9-381e-471b-a884-be34cce9a033", "homepage": "/dashboard-pages/provider-dashboard", "language": "en-US", "timezone": "UTC", "defaultContext": true, "organizationId": "23bf84ee-1060-459c-82b2-a52d004af01f", "onboardingCompleted": false}', '2026-07-14 00:11:13.225612', 'ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6', false);
+ ('5d9f516b-f218-4eea-831b-5164df6b263c', 'b571d101-b9d3-42b7-ba48-118f9b5b5f3e', 'default', '{"theme": "dark", "clinic": "e6b820a9-381e-471b-a884-be34cce9a033", "homepage": "/dashboard-pages/provider-dashboard", "language": "en-US", "timezone": "UTC", "defaultContext": true, "organizationId": "23bf84ee-1060-459c-82b2-a52d004af01f", "onboardingCompleted": false}', '2026-07-14 00:11:13.225612', 'ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6', false)  ON CONFLICT DO NOTHING;
+
+-- Link user to role
+INSERT INTO user_roles (
+    id,
+    "userContextId",
+    "roleId",
+    "assignedAt"
+) VALUES (
+             '87e377f6-b90c-4213-8aab-010c83dfe5d4',
+             'fe59cf0e-08cd-4e35-b152-a521fc81dcee'::uuid,
+             'ac4bfd3c-1f35-4d1d-8688-e4b062dda3f6'::uuid,
+             NOW()
+         ) ON CONFLICT DO NOTHING;
 
 
 
